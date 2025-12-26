@@ -5,6 +5,7 @@
 import type { GeneratedList } from '@/types';
 import { formatTimestamp, formatRelativeTime } from '@/utils/validation';
 import { saveParticipants, saveGroups } from '@/utils/local-storage';
+import { showAlert, showConfirm } from '@/utils/modal';
 
 export default () => ({
   isOpen: false,
@@ -118,9 +119,15 @@ export default () => ({
    * Remake a list with the same participants and groups
    */
   remakeWithSameSettings(list: GeneratedList) {
-    if (!confirm(this.i18nStore?.t('history.remakePrompt') || 'This will start a new session with the same participants and groups from this historical list. Continue?')) {
-      return;
-    }
+    showConfirm('history.remakePrompt', () => {
+      this.executeRemake(list);
+    });
+  },
+
+  /**
+   * Execute the remake operation
+   */
+  executeRemake(list: GeneratedList) {
 
     // Get stores
     const participantsStore = (window as any).Alpine?.store('participants');
@@ -161,14 +168,10 @@ export default () => ({
    * Clear all history
    */
   clearHistory() {
-    const confirmed = confirm(
-      this.i18nStore?.t('history.clearPrompt', { count: this.history.length }) || `Are you sure you want to delete all ${this.history.length} saved lists? This cannot be undone.`
-    );
-
-    if (confirmed) {
+    showConfirm('history.clearPrompt', () => {
       this.historyStore?.clearHistory();
       this.close();
-    }
+    }, { count: this.history.length });
   },
 
   /**
@@ -226,7 +229,7 @@ export default () => ({
    */
   openVerificationModal(assignment: any) {
     if (!this.allowHistoryAssignmentView) {
-      alert(this.i18nStore?.t('history.verificationDisabled') || 'Viewing assignments in history is disabled. Enable it in Config to use this feature.');
+      showAlert('history.verificationDisabled');
       return;
     }
 
@@ -271,12 +274,12 @@ export default () => ({
     const giverName = this.getParticipantName(this.selectedList, this.verificationModal.assignment.giverId);
 
     if (!inputName) {
-      this.verificationModal.error = 'Please enter your name';
+      this.verificationModal.error = this.i18nStore?.t('viewer.nameRequired') || 'Please enter your name';
       return;
     }
 
     if (inputName.toLowerCase() !== giverName.toLowerCase()) {
-      this.verificationModal.error = 'Name does not match. Please try again.';
+      this.verificationModal.error = this.i18nStore?.t('viewer.nameError') || 'Name does not match. Please try again.';
       return;
     }
 

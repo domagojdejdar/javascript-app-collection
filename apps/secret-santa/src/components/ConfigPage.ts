@@ -2,6 +2,8 @@
  * Alpine component for Configuration page
  */
 
+import { showAlert, showConfirm } from '@/utils/modal';
+
 export default () => ({
   tempMaxHistoryCount: 5,
   hasUnsavedChanges: false,
@@ -71,8 +73,7 @@ export default () => ({
    */
   saveMaxHistoryCount() {
     if (this.tempMaxHistoryCount < 1 || this.tempMaxHistoryCount > 50) {
-      const i18nStore = this.i18nStore;
-      alert(i18nStore?.t('config.maxHistory.error') || 'Max history count must be between 1 and 50');
+      showAlert('config.maxHistory.error');
       return;
     }
 
@@ -82,8 +83,7 @@ export default () => ({
 
     if (this.tempMaxHistoryCount < oldCount && this.currentHistoryCount > this.tempMaxHistoryCount) {
       const removed = this.currentHistoryCount - this.tempMaxHistoryCount;
-      const i18nStore = this.i18nStore;
-      alert(i18nStore?.t('config.maxHistory.trimmed', { count: removed }) || `History trimmed: ${removed} oldest ${removed === 1 ? 'entry' : 'entries'} removed`);
+      showAlert('config.maxHistory.trimmed', { count: removed });
     }
   },
 
@@ -106,12 +106,11 @@ export default () => ({
    * Reset all settings to defaults
    */
   resetToDefaults() {
-    const i18nStore = this.i18nStore;
-    if (confirm(i18nStore?.t('config.resetDefaults.prompt') || 'Are you sure you want to reset all settings to default values?')) {
+    showConfirm('config.resetDefaults.prompt', () => {
       this.configStore?.resetToDefaults();
       this.tempMaxHistoryCount = 5;
       this.hasUnsavedChanges = false;
-    }
+    });
   },
 
   /**
@@ -119,34 +118,31 @@ export default () => ({
    * If current list has assignments, it will be kept in history
    */
   resetCurrentSession() {
-    const i18nStore = this.i18nStore;
-    if (!confirm(i18nStore?.t('config.resetSession.prompt') || 'Are you sure you want to reset the current session? This will clear all participants, groups, and the current assignment list. The current list will be saved to history if it has assignments.')) {
-      return;
-    }
+    showConfirm('config.resetSession.prompt', () => {
+      // Get stores
+      const participantsStore = (window as any).Alpine?.store('participants');
+      const groupsStore = (window as any).Alpine?.store('groups');
+      const historyStore = (window as any).Alpine?.store('history');
 
-    // Get stores
-    const participantsStore = (window as any).Alpine?.store('participants');
-    const groupsStore = (window as any).Alpine?.store('groups');
-    const historyStore = (window as any).Alpine?.store('history');
+      // Save current list to history if it exists and has assignments
+      if (historyStore?.currentList && historyStore.currentList.assignments.length > 0) {
+        // The current list should already be in history from when it was generated
+        // Just clear the current reference
+        historyStore.clearCurrent();
+      } else if (historyStore) {
+        // No assignments or no current list, just clear
+        historyStore.clearCurrent();
+      }
 
-    // Save current list to history if it exists and has assignments
-    if (historyStore?.currentList && historyStore.currentList.assignments.length > 0) {
-      // The current list should already be in history from when it was generated
-      // Just clear the current reference
-      historyStore.clearCurrent();
-    } else if (historyStore) {
-      // No assignments or no current list, just clear
-      historyStore.clearCurrent();
-    }
+      // Clear participants and groups
+      if (participantsStore) {
+        participantsStore.clear();
+      }
+      if (groupsStore) {
+        groupsStore.clear();
+      }
 
-    // Clear participants and groups
-    if (participantsStore) {
-      participantsStore.clear();
-    }
-    if (groupsStore) {
-      groupsStore.clear();
-    }
-
-    alert(i18nStore?.t('config.resetSession.success') || 'Current session has been reset. You can start fresh with new participants and groups.');
+      showAlert('config.resetSession.success');
+    });
   },
 });

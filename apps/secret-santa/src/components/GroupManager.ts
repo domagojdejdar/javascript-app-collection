@@ -3,6 +3,7 @@
  */
 
 import type { Group, Participant } from '@/types';
+import { showConfirm } from '@/utils/modal';
 
 export default () => ({
   newGroupName: '',
@@ -125,14 +126,10 @@ export default () => ({
     const group = this.groups.find((g: Group) => g.id === groupId);
     if (!group) return;
 
-    const confirmed = confirm(
-      this.i18nStore?.t('groups.removePrompt', { name: group.name }) || `Remove group "${group.name}"? Participants will not be deleted.`
-    );
-
-    if (confirmed) {
+    showConfirm('groups.removePrompt', () => {
       this.groupsStore?.remove(groupId);
       this.collapseGroup(groupId);
-    }
+    }, { name: group.name });
   },
 
   /**

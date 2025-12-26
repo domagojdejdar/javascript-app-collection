@@ -3,6 +3,7 @@
  */
 
 import { navigateTo, getCurrentPage, onPageChange, type PageName } from '@/utils/router';
+import { showConfirm } from '@/utils/modal';
 
 export default () => ({
   isMenuOpen: false,
@@ -117,11 +118,15 @@ export default () => ({
    * Returns to homepage
    */
   resetCurrentSession() {
-    const i18nStore = this.i18nStore;
-    if (!confirm(i18nStore?.t('config.resetSession.prompt') || 'Are you sure you want to reset the current session? This will clear all participants, groups, and the current assignment list.')) {
-      return;
-    }
+    showConfirm('config.resetSession.prompt', () => {
+      this.executeReset();
+    });
+  },
 
+  /**
+   * Execute the session reset
+   */
+  executeReset() {
     // Save current list to history if it exists and has assignments
     if (this.historyStore?.currentList && this.historyStore.currentList.assignments.length > 0) {
       // The current list should already be in history from when it was generated

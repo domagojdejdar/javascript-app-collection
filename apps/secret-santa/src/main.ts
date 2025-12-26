@@ -22,6 +22,7 @@ import AssignmentGenerator from '@/components/AssignmentGenerator';
 import AssignmentViewer from '@/components/AssignmentViewer';
 import HistoryModal from '@/components/HistoryModal';
 import ConfigPage from '@/components/ConfigPage';
+import GlobalModal from '@/components/GlobalModal';
 
 // Initialize i18n before Alpine
 await initI18n();
@@ -32,6 +33,7 @@ Alpine.store('config', configStore());
 Alpine.store('participants', participantsStore());
 Alpine.store('groups', groupsStore());
 Alpine.store('history', historyStore());
+Alpine.store('globalModal', GlobalModal());
 
 // Initialize config store immediately (needed for other stores)
 document.addEventListener('alpine:init', () => {
@@ -64,6 +66,17 @@ Alpine.magic('t', () => {
     return i18nStore?.t(key, options) || key;
   };
 });
+
+// Add global modal helpers
+(window as any).showAlert = (message: string) => {
+  const modal = (window as any).Alpine?.store('globalModal');
+  if (modal) modal.alert(message);
+};
+
+(window as any).showConfirm = (message: string, onConfirm: () => void, onCancel?: () => void) => {
+  const modal = (window as any).Alpine?.store('globalModal');
+  if (modal) modal.confirm(message, onConfirm, onCancel);
+};
 
 // Reset to home page on page load/refresh
 resetToHome();

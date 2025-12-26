@@ -2,6 +2,8 @@
  * Alpine component for generating Secret Santa assignments
  */
 
+import { showConfirm } from '@/utils/modal';
+
 export default () => ({
   /**
    * Get the history store
@@ -89,14 +91,18 @@ export default () => ({
   generate() {
     // If there's a current list with revealed assignments, confirm first
     if (this.hasCurrentList && this.hasRevealedAssignments) {
-      const i18nStore = (window as any).Alpine?.store('i18n');
-      const confirmed = confirm(
-        i18nStore?.t('assignments.regeneratePrompt') || 'Regenerating will clear the current assignments, including any that have been revealed. Continue?'
-      );
+      showConfirm('assignments.regeneratePrompt', () => {
+        const success = this.historyStore?.generate();
 
-      if (!confirmed) {
-        return;
-      }
+        if (success) {
+          // Scroll to assignments view
+          this.$nextTick(() => {
+            const assignmentViewer = document.getElementById('assignment-viewer');
+            assignmentViewer?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }
+      });
+      return;
     }
 
     const success = this.historyStore?.generate();
@@ -114,14 +120,9 @@ export default () => ({
    * Clear current assignments
    */
   clearCurrent() {
-    const i18nStore = (window as any).Alpine?.store('i18n');
-    const confirmed = confirm(
-      i18nStore?.t('assignments.clearPrompt') || 'Are you sure you want to clear the current assignments? This will not delete them from history.'
-    );
-
-    if (confirmed) {
+    showConfirm('assignments.clearPrompt', () => {
       this.historyStore?.clearCurrent();
-    }
+    });
   },
 
   /**

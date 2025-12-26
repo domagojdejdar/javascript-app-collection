@@ -16,6 +16,11 @@ export default {
     resetSession: 'Resetiraj trenutnu sesiju',
   },
 
+  navigation: {
+    language: 'Jezik',
+    toggleMenu: 'Prebaci izbornik',
+  },
+
   // Home page
   home: {
     title: 'Tajni Djed Mraz',
@@ -167,18 +172,18 @@ export default {
   // Assignment viewer
   viewer: {
     title: 'Vaše dodjele',
-    verifyIdentity: 'Potvrdite svoj identitet',
+    verifyIdentity: '🎅 Potvrdite svoj identitet',
     clickToReveal: 'Kliknite na svoje ime da otkrijete svoju Tajni Djed Mraz dodjelu',
     verify: 'Provjeri i otkrij',
-    enterName: 'Unesite svoje ime da otkrijete svoju dodjelu Tajnog Djed Mraza',
+    enterName: 'Unesite svoje ime za pregled ove dodjele iz povijesti',
     namePlaceholder: 'Unesite svoje ime...',
     yourName: 'Vaše ime',
+    nameRequired: 'Molimo unesite svoje ime',
     nameError: 'Ime se ne podudara. Molimo pokušajte ponovno.',
     revealing: 'Otkrivanje dodjele...',
     revealAssignment: 'Otkrij dodjelu',
-    youAreSecretSantaFor: ', vi ste Tajni Djed Mraz za:',
-    closeIn: 'Ovo će se zatvoriti za',
-    seconds: 'sekundi',
+    youAreSecretSantaFor: 'bili ste Tajni Djed Mraz za:',
+    closeIn: 'Ovo će se zatvoriti za {seconds} sekundi',
     closeNow: 'Zatvori sada',
     timeRemaining: 'Preostalo vrijeme: {seconds}s',
     gives: '{giver} daruje {receiver}',

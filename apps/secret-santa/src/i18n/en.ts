@@ -16,6 +16,11 @@ export default {
     resetSession: 'Reset Current Session',
   },
 
+  navigation: {
+    language: 'Language',
+    toggleMenu: 'Toggle menu',
+  },
+
   // Home page
   home: {
     title: 'Secret Santa',
@@ -167,18 +172,18 @@ export default {
   // Assignment viewer
   viewer: {
     title: 'Your Assignments',
-    verifyIdentity: 'Verify Your Identity',
+    verifyIdentity: '🎅 Verify Your Identity',
     clickToReveal: 'Click on your name to reveal your Secret Santa assignment',
     verify: 'Verify and Reveal',
-    enterName: 'Enter your name to reveal your Secret Santa assignment',
+    enterName: 'Enter your name to view this assignment from history',
     namePlaceholder: 'Enter your name...',
     yourName: 'Your Name',
+    nameRequired: 'Please enter your name',
     nameError: 'Name does not match. Please try again.',
     revealing: 'Revealing assignment...',
     revealAssignment: 'Reveal Assignment',
-    youAreSecretSantaFor: ', you are Secret Santa for:',
-    closeIn: 'This will close in',
-    seconds: 'seconds',
+    youAreSecretSantaFor: 'you were Secret Santa for:',
+    closeIn: 'This will close in {seconds} seconds',
     closeNow: 'Close Now',
     timeRemaining: 'Time remaining: {seconds}s',
     gives: '{giver} gives to {receiver}',

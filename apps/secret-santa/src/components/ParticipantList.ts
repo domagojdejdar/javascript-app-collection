@@ -3,6 +3,7 @@
  */
 
 import type { Participant } from '@/types';
+import { showConfirm } from '@/utils/modal';
 
 export default () => ({
   confirmingDelete: null as string | null,
@@ -106,14 +107,10 @@ export default () => ({
   clearAll() {
     if (this.participants.length === 0) return;
 
-    const confirmed = confirm(
-      this.i18nStore?.t('participants.clearAllPrompt', { count: this.participants.length }) || `Are you sure you want to remove all ${this.participants.length} participants? This will also clear all groups.`
-    );
-
-    if (confirmed) {
+    showConfirm('participants.clearAllPrompt', () => {
       this.participantsStore?.clear();
       this.confirmingDelete = null;
-    }
+    }, { count: this.participants.length });
   },
 
   /**

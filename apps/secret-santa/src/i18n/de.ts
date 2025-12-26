@@ -16,6 +16,11 @@ export default {
     resetSession: 'Aktuelle Sitzung zurücksetzen',
   },
 
+  navigation: {
+    language: 'Sprache',
+    toggleMenu: 'Menü umschalten',
+  },
+
   // Home page
   home: {
     title: 'Wichteln',
@@ -167,18 +172,18 @@ export default {
   // Assignment viewer
   viewer: {
     title: 'Ihre Zuweisungen',
-    verifyIdentity: 'Identität überprüfen',
+    verifyIdentity: '🎅 Identität überprüfen',
     clickToReveal: 'Klicken Sie auf Ihren Namen, um Ihre Wichtel-Zuweisung aufzudecken',
     verify: 'Überprüfen und aufdecken',
-    enterName: 'Geben Sie Ihren Namen ein, um Ihre Wichtel-Zuweisung aufzudecken',
+    enterName: 'Geben Sie Ihren Namen ein, um diese Zuweisung aus der Historie anzuzeigen',
     namePlaceholder: 'Geben Sie Ihren Namen ein...',
     yourName: 'Ihr Name',
+    nameRequired: 'Bitte geben Sie Ihren Namen ein',
     nameError: 'Name stimmt nicht überein. Bitte versuchen Sie es erneut.',
     revealing: 'Zuweisung wird aufgedeckt...',
     revealAssignment: 'Zuweisung aufdecken',
-    youAreSecretSantaFor: ', Sie sind Wichtel für:',
-    closeIn: 'Schließt in',
-    seconds: 'Sekunden',
+    youAreSecretSantaFor: 'Sie waren Wichtel für:',
+    closeIn: 'Schließt in {seconds} Sekunden',
     closeNow: 'Jetzt schließen',
     timeRemaining: 'Verbleibende Zeit: {seconds}s',
     gives: '{giver} schenkt {receiver}',
