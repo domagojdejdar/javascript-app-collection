@@ -117,7 +117,8 @@ export default () => ({
    * Returns to homepage
    */
   resetCurrentSession() {
-    if (!confirm('Are you sure you want to reset the current session? This will clear all participants, groups, and the current assignment list.')) {
+    const i18nStore = this.i18nStore;
+    if (!confirm(i18nStore?.t('config.resetSession.prompt') || 'Are you sure you want to reset the current session? This will clear all participants, groups, and the current assignment list.')) {
       return;
     }
 

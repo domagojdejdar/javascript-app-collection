@@ -92,6 +92,7 @@ export default {
     deleteConfirm: 'Löschen?',
     removeTitle: 'Teilnehmer entfernen',
     confirmTitle: 'Klicken Sie erneut zur Bestätigung',
+    clearAllPrompt: 'Möchten Sie wirklich alle {count} Teilnehmer entfernen? Dies wird auch alle Gruppen löschen.',
     breadcrumb: {
       step1: '1. Teilnehmer',
       step2: '2. Gruppen (optional)',
@@ -286,5 +287,6 @@ export default {
     loading: 'Wird geladen...',
     error: 'Fehler',
     success: 'Erfolg',
+    footer: 'Mit ❤️ gemacht, um Urlaubsfreude zu verbreiten',
   },
 };

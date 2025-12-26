@@ -8,6 +8,13 @@ export default () => ({
   confirmingDelete: null as string | null,
 
   /**
+   * Get i18n store
+   */
+  get i18nStore() {
+    return (window as any).Alpine?.store('i18n');
+  },
+
+  /**
    * Get the participants store
    */
   get participantsStore() {
@@ -100,7 +107,7 @@ export default () => ({
     if (this.participants.length === 0) return;
 
     const confirmed = confirm(
-      `Are you sure you want to remove all ${this.participants.length} participants? This will also clear all groups.`
+      this.i18nStore?.t('participants.clearAllPrompt', { count: this.participants.length }) || `Are you sure you want to remove all ${this.participants.length} participants? This will also clear all groups.`
     );
 
     if (confirmed) {

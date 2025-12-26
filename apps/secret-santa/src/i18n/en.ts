@@ -92,6 +92,7 @@ export default {
     deleteConfirm: 'Delete?',
     removeTitle: 'Remove participant',
     confirmTitle: 'Click again to confirm',
+    clearAllPrompt: 'Are you sure you want to remove all {count} participants? This will also clear all groups.',
     breadcrumb: {
       step1: '1. Participants',
       step2: '2. Groups (Optional)',
@@ -315,5 +316,6 @@ export default {
     loading: 'Loading...',
     error: 'Error',
     success: 'Success',
+    footer: 'Made with ❤️ for spreading holiday cheer',
   },
 };

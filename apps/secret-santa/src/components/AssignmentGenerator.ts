@@ -114,8 +114,9 @@ export default () => ({
    * Clear current assignments
    */
   clearCurrent() {
+    const i18nStore = (window as any).Alpine?.store('i18n');
     const confirmed = confirm(
-      'Are you sure you want to clear the current assignments? This will not delete them from history.'
+      i18nStore?.t('assignments.clearPrompt') || 'Are you sure you want to clear the current assignments? This will not delete them from history.'
     );
 
     if (confirmed) {

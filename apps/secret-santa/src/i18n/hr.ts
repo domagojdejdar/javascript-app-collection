@@ -92,6 +92,7 @@ export default {
     deleteConfirm: 'Obriši?',
     removeTitle: 'Ukloni sudionika',
     confirmTitle: 'Kliknite ponovno za potvrdu',
+    clearAllPrompt: 'Jeste li sigurni da želite ukloniti svih {count} sudionika? Ovo će također očistiti sve grupe.',
     breadcrumb: {
       step1: '1. Sudionici',
       step2: '2. Grupe (neobavezno)',
@@ -286,5 +287,6 @@ export default {
     loading: 'Učitavanje...',
     error: 'Greška',
     success: 'Uspjeh',
+    footer: 'Napravljeno s ❤️ za širenje blagdanske radosti',
   },
 };

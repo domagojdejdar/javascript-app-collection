@@ -11,6 +11,13 @@ export default () => ({
   selectedParticipants: {} as Record<string, string[]>, // groupId -> participantIds
 
   /**
+   * Get i18n store
+   */
+  get i18nStore() {
+    return (window as any).Alpine?.store('i18n');
+  },
+
+  /**
    * Get the groups store
    */
   get groupsStore() {
@@ -119,7 +126,7 @@ export default () => ({
     if (!group) return;
 
     const confirmed = confirm(
-      `Remove group "${group.name}"? Participants will not be deleted.`
+      this.i18nStore?.t('groups.removePrompt', { name: group.name }) || `Remove group "${group.name}"? Participants will not be deleted.`
     );
 
     if (confirmed) {

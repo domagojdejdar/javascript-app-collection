@@ -19,6 +19,13 @@ export default () => ({
   },
 
   /**
+   * Get i18n store
+   */
+  get i18nStore() {
+    return (window as any).Alpine?.store('i18n');
+  },
+
+  /**
    * Get the history store
    */
   get historyStore() {
@@ -111,7 +118,7 @@ export default () => ({
    * Remake a list with the same participants and groups
    */
   remakeWithSameSettings(list: GeneratedList) {
-    if (!confirm('This will start a new session with the same participants and groups from this historical list. Continue?')) {
+    if (!confirm(this.i18nStore?.t('history.remakePrompt') || 'This will start a new session with the same participants and groups from this historical list. Continue?')) {
       return;
     }
 
@@ -155,7 +162,7 @@ export default () => ({
    */
   clearHistory() {
     const confirmed = confirm(
-      `Are you sure you want to delete all ${this.history.length} saved lists? This cannot be undone.`
+      this.i18nStore?.t('history.clearPrompt', { count: this.history.length }) || `Are you sure you want to delete all ${this.history.length} saved lists? This cannot be undone.`
     );
 
     if (confirmed) {
@@ -219,7 +226,7 @@ export default () => ({
    */
   openVerificationModal(assignment: any) {
     if (!this.allowHistoryAssignmentView) {
-      alert('Viewing assignments in history is disabled. Enable it in Config to use this feature.');
+      alert(this.i18nStore?.t('history.verificationDisabled') || 'Viewing assignments in history is disabled. Enable it in Config to use this feature.');
       return;
     }
 

@@ -815,112 +815,105 @@
         <!-- How-To Page -->
         <div x-show="isPage('how-to')" x-cloak x-data="howToPage" class="container mx-auto px-4 max-w-4xl">
           <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ How To Use Secret Santa</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ <span x-text="$t('howTo.title')"></span></h2>
 
             <div class="space-y-8">
               <div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span class="text-3xl">1️⃣</span> Add Participants
+                  <span class="text-3xl">1️⃣</span> <span x-text="$t('howTo.step1.title')"></span>
                 </h3>
-                <p class="text-gray-700 mb-2">
-                  Navigate to the <strong>Participants</strong> page and add everyone who will be participating in your Secret Santa exchange.
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step1.description')">
                 </p>
                 <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
-                  <li>Enter each person's name and click "Add Participant"</li>
-                  <li>You need at least 2 participants to generate assignments</li>
-                  <li>You can remove participants by clicking the × button next to their name</li>
+                  <li x-text="$t('howTo.step1.detail1')"></li>
+                  <li x-text="$t('howTo.step1.detail2')"></li>
+                  <li x-text="$t('howTo.step1.detail3')"></li>
                 </ul>
               </div>
 
               <div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span class="text-3xl">2️⃣</span> Create Groups (Optional)
+                  <span class="text-3xl">2️⃣</span> <span x-text="$t('howTo.step2.title')"></span>
                 </h3>
-                <p class="text-gray-700 mb-2">
-                  If you have couples or family members who shouldn't draw each other, create exclusion groups on the <strong>Groups</strong> page.
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step2.description')">
                 </p>
                 <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
-                  <li>Click "Create New Group" and give it a name (e.g., "Smith Family")</li>
-                  <li>Add participants to the group using the dropdown</li>
-                  <li>People in the same group will never be assigned to each other</li>
+                  <li x-text="$t('howTo.step2.detail1')"></li>
+                  <li x-text="$t('howTo.step2.detail2')"></li>
+                  <li x-text="$t('howTo.step2.detail3')"></li>
                 </ul>
               </div>
 
               <div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span class="text-3xl">3️⃣</span> Generate Assignments
+                  <span class="text-3xl">3️⃣</span> <span x-text="$t('howTo.step3.title')"></span>
                 </h3>
-                <p class="text-gray-700 mb-2">
-                  Go to the <strong>Assignments</strong> page and click "Generate Assignments" to create your Secret Santa pairings.
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step3.description')">
                 </p>
                 <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
-                  <li>The system ensures everyone gives and receives exactly once</li>
-                  <li>Group constraints are automatically respected</li>
-                  <li>If generation fails, try adjusting your groups</li>
+                  <li x-text="$t('howTo.step3.detail1')"></li>
+                  <li x-text="$t('howTo.step3.detail2')"></li>
+                  <li x-text="$t('howTo.step3.detail3')"></li>
                 </ul>
               </div>
 
               <div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span class="text-3xl">4️⃣</span> Reveal Assignments
+                  <span class="text-3xl">4️⃣</span> <span x-text="$t('howTo.step4.title')"></span>
                 </h3>
-                <p class="text-gray-700 mb-2">
-                  Each participant can click on their name to see who they're buying a gift for.
+                <p class="text-gray-700 mb-2" x-text="$t('howTo.step4.description')">
                 </p>
                 <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
-                  <li>Click on a participant's name</li>
-                  <li>Enter the exact name to verify identity</li>
-                  <li>The assignment will be displayed for 5 seconds</li>
-                  <li>After viewing, the assignment is marked as "revealed"</li>
+                  <li x-text="$t('howTo.step4.detail1')"></li>
+                  <li x-text="$t('howTo.step4.detail2')"></li>
+                  <li x-text="$t('howTo.step4.detail3')"></li>
+                  <li x-text="$t('howTo.step4.detail4')"></li>
                 </ul>
               </div>
 
               <div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span class="text-3xl">5️⃣</span> View History
+                  <span class="text-3xl">5️⃣</span> <span x-text="$t('howTo.step5.title')"></span>
                 </h3>
-                <p class="text-gray-700 mb-2">
-                  Check the <strong>History</strong> page to see your past generated lists.
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step5.description')">
                 </p>
                 <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
-                  <li>Recent assignment lists are saved (default: 5, configurable in Config)</li>
-                  <li>Click "View Details" to see a specific list</li>
-                  <li>Click "Load List" to make it the current active list</li>
-                  <li>If enabled in Config, you can click on assignments to reveal them with name verification</li>
+                  <li x-text="$t('howTo.step5.detail1')"></li>
+                  <li x-text="$t('howTo.step5.detail2')"></li>
+                  <li x-text="$t('howTo.step5.detail3')"></li>
+                  <li x-text="$t('howTo.step5.detail4')"></li>
                 </ul>
               </div>
 
               <div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span class="text-3xl">6️⃣</span> Configure Settings
+                  <span class="text-3xl">6️⃣</span> <span x-text="$t('howTo.step6.title')"></span>
                 </h3>
-                <p class="text-gray-700 mb-2">
-                  Visit the <strong>Config</strong> page to customize your Secret Santa experience.
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step6.description')">
                 </p>
                 <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
-                  <li><strong>Maximum History Count:</strong> Set how many past assignment lists to keep (1-50, default: 5)</li>
-                  <li><strong>Allow Viewing Assignments in History:</strong> Enable/disable the ability to reveal past assignments with name verification</li>
-                  <li><strong>Reset Current Session:</strong> Clear participants, groups, and current list while preserving history</li>
-                  <li><strong>Reset All Settings:</strong> Restore all configuration to default values</li>
+                  <li x-html="$t('howTo.step6.detail1')"></li>
+                  <li x-html="$t('howTo.step6.detail2')"></li>
+                  <li x-html="$t('howTo.step6.detail3')"></li>
+                  <li x-html="$t('howTo.step6.detail4')"></li>
                 </ul>
               </div>
 
               <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-8">
-                <h4 class="font-bold text-blue-900 mb-2">💡 Tips</h4>
+                <h4 class="font-bold text-blue-900 mb-2">💡 <span x-text="$t('howTo.tips.title')"></span></h4>
                 <ul class="text-blue-800 space-y-1 text-sm">
-                  <li>• Make sure everyone knows their budget limit before revealing assignments</li>
-                  <li>• Use groups wisely - too many constraints can make it impossible to generate valid assignments</li>
-                  <li>• Your data is saved locally in your browser, so you can close and come back later</li>
-                  <li>• On page refresh, you'll be asked if you want to restore your previous session or start fresh</li>
-                  <li>• Adjust the history limit in Config if you need to keep more or fewer past lists</li>
-                  <li>• Enable "Allow Viewing Assignments in History" if you want to review past assignments securely</li>
+                  <li>• <span x-text="$t('howTo.tips.tip1')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip2')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip3')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip4')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip5')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip6')"></span></li>
                 </ul>
               </div>
             </div>
 
             <div class="mt-8 text-center">
-              <button @click="goTo('participants')" class="btn btn-primary">
-                Start Creating Your Secret Santa
+              <button @click="goTo('participants')" class="btn btn-primary" x-text="$t('howTo.startButton')">
               </button>
             </div>
           </section>
@@ -929,7 +922,7 @@
 
       <!-- Footer -->
       <footer class="text-center py-6 text-gray-600 text-sm">
-        <p>Made with ❤️ for spreading holiday cheer</p>
+        <p x-text="$t('common.footer')"></p>
       </footer>
     </div>
 
