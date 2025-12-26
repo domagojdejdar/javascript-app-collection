@@ -185,7 +185,6 @@ export default {
     youAreSecretSantaFor: 'Sie waren Wichtel für:',
     closeIn: 'Schließt in {seconds} Sekunden',
     closeNow: 'Jetzt schließen',
-    timeRemaining: 'Verbleibende Zeit: {seconds}s',
     gives: '{giver} schenkt {receiver}',
     givesTo: 'schenkt',
     revealed: 'Aufgedeckt {date}',

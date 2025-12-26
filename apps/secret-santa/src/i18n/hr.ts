@@ -185,7 +185,6 @@ export default {
     youAreSecretSantaFor: 'bili ste Tajni Djed Mraz za:',
     closeIn: 'Ovo će se zatvoriti za {seconds} sekundi',
     closeNow: 'Zatvori sada',
-    timeRemaining: 'Preostalo vrijeme: {seconds}s',
     gives: '{giver} daruje {receiver}',
     givesTo: 'daruje',
     revealed: 'Otkriveno {date}',

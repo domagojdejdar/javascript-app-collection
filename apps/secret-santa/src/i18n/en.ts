@@ -185,7 +185,6 @@ export default {
     youAreSecretSantaFor: 'you were Secret Santa for:',
     closeIn: 'This will close in {seconds} seconds',
     closeNow: 'Close Now',
-    timeRemaining: 'Time remaining: {seconds}s',
     gives: '{giver} gives to {receiver}',
     givesTo: 'gives to',
     revealed: 'Revealed {date}',

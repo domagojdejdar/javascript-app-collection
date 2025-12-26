@@ -77,6 +77,8 @@ export async function initI18n(initialLanguage?: Language): Promise<void> {
     },
     interpolation: {
       escapeValue: false, // React already escapes values
+      prefix: '{',
+      suffix: '}',
     },
   });
 
