@@ -88,6 +88,10 @@ export default {
     remove: 'Remove',
     clearAll: 'Clear All',
     groups: 'Groups',
+    groupsLabel: 'Groups:',
+    deleteConfirm: 'Delete?',
+    removeTitle: 'Remove participant',
+    confirmTitle: 'Click again to confirm',
     breadcrumb: {
       step1: '1. Participants',
       step2: '2. Groups (Optional)',

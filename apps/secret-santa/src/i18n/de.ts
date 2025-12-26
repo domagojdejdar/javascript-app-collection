@@ -88,6 +88,10 @@ export default {
     remove: 'Entfernen',
     clearAll: 'Alle löschen',
     groups: 'Gruppen',
+    groupsLabel: 'Gruppen:',
+    deleteConfirm: 'Löschen?',
+    removeTitle: 'Teilnehmer entfernen',
+    confirmTitle: 'Klicken Sie erneut zur Bestätigung',
     breadcrumb: {
       step1: '1. Teilnehmer',
       step2: '2. Gruppen (optional)',

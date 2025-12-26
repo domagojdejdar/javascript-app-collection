@@ -88,6 +88,10 @@ export default {
     remove: 'Ukloni',
     clearAll: 'Očisti sve',
     groups: 'Grupe',
+    groupsLabel: 'Grupe:',
+    deleteConfirm: 'Obriši?',
+    removeTitle: 'Ukloni sudionika',
+    confirmTitle: 'Kliknite ponovno za potvrdu',
     breadcrumb: {
       step1: '1. Sudionici',
       step2: '2. Grupe (neobavezno)',
