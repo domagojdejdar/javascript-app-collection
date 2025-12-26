@@ -5,7 +5,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    base: mode === 'production' ? '/secret-santa/' : '/',
+    base: mode === 'production' ? '/javascript-app-collection/secret-santa/' : '/',
     resolve: {
       alias: {
         '@': resolve(__dirname, './src'),
