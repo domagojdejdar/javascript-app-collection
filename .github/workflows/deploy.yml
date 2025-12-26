@@ -32,6 +32,10 @@ jobs:
         working-directory: apps/secret-santa
         run: npm ci
 
+      - name: Create .env file
+        working-directory: apps/secret-santa
+        run: echo "ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }}" > .env
+
       - name: Build
         working-directory: apps/secret-santa
         run: npm run build
