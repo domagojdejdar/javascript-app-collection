@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Secret Santa enrollment and assignment application" />
+    <title>Secret Santa - Gift Exchange Manager</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="bg-gradient-to-br from-christmas-green via-gray-50 to-christmas-red min-h-screen">
+    <div id="app" x-data="pageContainer" class="min-h-screen">
+      <!-- Hamburger Navigation -->
+      <nav x-data="navigation" @keydown.escape="handleKeyPress($event)" class="fixed top-0 left-0 right-0 bg-white shadow-lg z-50">
+        <div class="container mx-auto px-4">
+          <div class="flex items-center justify-between h-16">
+            <!-- Logo/Title -->
+            <button @click="goTo('home')" class="flex items-center gap-2 text-xl font-bold text-christmas-red hover:text-red-700 transition-colors">
+              🎅 <span x-text="$t('home.title')"></span>
+            </button>
+
+            <!-- Hamburger Button -->
+            <button
+              @click="toggleMenu"
+              class="p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-christmas-red"
+              :aria-label="$t('navigation.toggleMenu')"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path x-show="!isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path x-show="isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Menu Dropdown -->
+        <div
+          x-show="isMenuOpen"
+          x-transition:enter="transition ease-out duration-200"
+          x-transition:enter-start="opacity-0 -translate-y-2"
+          x-transition:enter-end="opacity-100 translate-y-0"
+          x-transition:leave="transition ease-in duration-150"
+          x-transition:leave-start="opacity-100 translate-y-0"
+          x-transition:leave-end="opacity-0 -translate-y-2"
+          @click.away="closeMenu"
+          class="absolute top-full left-0 right-0 bg-white border-t shadow-lg md:left-auto md:right-4 md:w-80"
+          x-cloak
+        >
+          <div class="container mx-auto px-4 py-4 md:px-0">
+            <!-- Get Started / Continue Button -->
+            <button
+              @click="handleGetStarted()"
+              class="w-full text-left px-4 py-3 rounded-lg transition-colors mb-4 flex items-center gap-3 bg-christmas-red text-white hover:bg-red-700 font-semibold"
+            >
+              <span x-text="getStartedIcon" class="text-xl"></span>
+              <span x-text="getStartedLabel" class="flex-1"></span>
+            </button>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-200 mb-4"></div>
+
+            <!-- Menu Items -->
+            <template x-for="item in menuItems" :key="item.name">
+              <button
+                @click="goTo(item.name)"
+                :class="isActive(item.name) ? 'bg-christmas-green text-white' : 'text-gray-700 hover:bg-gray-100'"
+                class="w-full text-left px-4 py-3 rounded-lg transition-colors mb-2 flex items-center gap-3"
+              >
+                <span x-text="item.icon" class="text-xl"></span>
+                <span x-text="item.label" class="font-medium"></span>
+              </button>
+            </template>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-200 my-4"></div>
+
+            <!-- Reset Current Session Button -->
+            <button
+              x-show="hasSessionData"
+              @click="resetCurrentSession()"
+              class="w-full text-left px-4 py-3 rounded-lg transition-colors text-red-600 hover:bg-red-50 flex items-center gap-3"
+              x-cloak
+            >
+              <span class="text-xl">🔄</span>
+              <span class="font-medium" x-text="$t('config.resetSession.button')"></span>
+            </button>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-200 my-4"></div>
+
+            <!-- Language Selector -->
+            <div class="px-4">
+              <p class="text-xs text-gray-500 mb-2 uppercase tracking-wide" x-text="$t('navigation.language')"></p>
+              <div class="flex gap-2">
+                <template x-for="(langInfo, langCode) in languageOptions" :key="langCode">
+                  <button
+                    @click="switchLanguage(langCode)"
+                    :class="currentLanguage === langCode ? 'bg-christmas-green text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="flex-1 px-3 py-2 rounded-lg transition-colors text-center text-sm font-medium"
+                    :title="langInfo.name"
+                  >
+                    <span class="text-lg" x-text="langInfo.flag"></span>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content - Add padding-top for fixed nav -->
+      <main class="pt-20 pb-8">
+        <!-- Home Page -->
+        <div x-show="isPage('home')" x-data="homePage" x-cloak class="container mx-auto px-4 max-w-4xl">
+          <!-- Restore State Prompt -->
+          <div x-show="showRestorePrompt" class="mb-8 bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6" x-cloak>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">💾 <span x-text="$t('home.restore.title')"></span></h3>
+            <p class="text-gray-600 mb-4" x-text="$t('home.restore.description')"></p>
+            <div class="flex gap-3">
+              <button @click="restoreState" class="btn btn-primary" x-text="$t('home.restore.restoreButton')"></button>
+              <button @click="startFresh" class="btn btn-outline" x-text="$t('home.restore.startFreshButton')"></button>
+            </div>
+          </div>
+
+          <!-- Hero Section -->
+          <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-4">🎅 <span x-text="$t('home.title')"></span></h1>
+            <p class="text-2xl text-gray-600 mb-2" x-text="$t('home.subtitle')"></p>
+            <p class="text-lg text-gray-500" x-text="$t('home.description')"></p>
+          </div>
+
+          <!-- Description -->
+          <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6" x-text="$t('home.whatIs.title')"></h2>
+            <p class="text-gray-700 mb-4 leading-relaxed" x-text="$t('home.whatIs.description1')"></p>
+            <p class="text-gray-700 leading-relaxed" x-text="$t('home.whatIs.description2')"></p>
+          </div>
+
+          <!-- Features -->
+          <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">✨ <span x-text="$t('home.features.title')"></span></h2>
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">👥</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.manage.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.manage.description')"></p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">🎄</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.createGroups.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.createGroups.description')"></p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">🎲</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.smartAssignment.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.smartAssignment.description')"></p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">🔒</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.secureReveal.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.secureReveal.description')"></p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">⏱️</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.timing.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.timing.description')"></p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">📜</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.history.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.history.description')"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Get Started -->
+          <div class="text-center">
+            <button @click="goTo('participants')" class="btn btn-primary text-xl px-8 py-4">
+              🎁 <span x-text="$t('home.getStartedButton')"></span>
+            </button>
+            <p class="text-gray-500 text-sm mt-4"><span x-text="$t('home.orCheckOut')"></span> <button @click="goTo('how-to')" class="text-christmas-red hover:underline" x-text="$t('home.howToGuideLink')"></button></p>
+          </div>
+        </div>
+
+        <!-- Participants Page -->
+        <div x-show="isPage('participants')" x-cloak class="container mx-auto px-4 max-w-6xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <!-- Breadcrumbs -->
+            <div class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+              <span class="font-semibold text-christmas-red" x-text="$t('participants.breadcrumb.step1')"></span>
+              <span>→</span>
+              <span class="text-gray-400" x-text="$t('participants.breadcrumb.step2')"></span>
+              <span>→</span>
+              <span class="text-gray-400" x-text="$t('participants.breadcrumb.step3')"></span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+              👥 <span x-text="$t('participants.manageTitle')"></span>
+            </h2>
+
+            <!-- Name Input Component -->
+            <div x-data="nameInput" class="mb-6">
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1">
+                  <input
+                    type="text"
+                    x-model="name"
+                    @input="clearError"
+                    @keydown="handleKeyPress($event)"
+                    :placeholder="$t('participants.addPlaceholder')"
+                    class="input"
+                    :class="{ 'input-error': error }"
+                    maxlength="50"
+                  />
+                </div>
+                <button
+                  @click="submit"
+                  :disabled="!isValid || isSubmitting"
+                  class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  <span x-show="!isSubmitting" x-text="$t('participants.addButton')"></span>
+                  <span x-show="isSubmitting" x-text="$t('participants.adding')"></span>
+                </button>
+              </div>
+              <p x-show="error" x-text="error" class="text-red-600 text-sm mt-2" x-cloak></p>
+            </div>
+
+            <!-- Participant List Component -->
+            <div x-data="participantList">
+              <div x-show="!hasParticipants" class="text-center py-8 text-gray-500" x-cloak>
+                <p class="text-lg" x-text="$t('participants.noParticipants')"></p>
+                <p class="text-sm" x-text="$t('participants.addFirst')"></p>
+              </div>
+
+              <div x-show="hasParticipants" x-cloak>
+                <div class="flex justify-between items-center mb-4">
+                  <p class="text-sm text-gray-600">
+                    <span x-text="count"></span> <span x-text="count === 1 ? $t('participants.countSingular') : $t('participants.countPlural')"></span>
+                  </p>
+                  <button
+                    @click="clearAll"
+                    class="text-sm text-red-600 hover:text-red-700 transition-colors"
+                    x-text="$t('participants.clearAll')"
+                  >
+                  </button>
+                </div>
+
+                <div class="space-y-2">
+                  <template x-for="participant in participants" :key="participant.id">
+                    <div class="card flex items-center justify-between">
+                      <div class="flex-1">
+                        <p class="font-medium text-gray-800" x-text="participant.name"></p>
+                        <p
+                          x-show="hasGroups(participant.id)"
+                          x-text="$t('participants.groupsLabel') + ' ' + getGroupsText(participant.id)"
+                          class="text-xs text-gray-500 mt-1"
+                          x-cloak
+                        ></p>
+                      </div>
+                      <button
+                        @click="remove(participant.id)"
+                        :class="isConfirmingDelete(participant.id) ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-red-600'"
+                        class="ml-4 p-2 rounded-lg transition-all"
+                        :title="isConfirmingDelete(participant.id) ? $t('participants.confirmTitle') : $t('participants.removeTitle')"
+                      >
+                        <span x-show="!isConfirmingDelete(participant.id)">✕</span>
+                        <span x-show="isConfirmingDelete(participant.id)" x-text="$t('participants.deleteConfirm')"></span>
+                      </button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Next Button -->
+            <div class="mt-6 flex justify-end">
+              <button @click="goTo('groups')" x-data="navigation" class="btn btn-primary">
+                <span x-text="$t('participants.nextButton')"></span> →
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Groups Page -->
+        <div x-show="isPage('groups')" x-cloak class="container mx-auto px-4 max-w-6xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8" x-data="groupManager">
+            <!-- Breadcrumbs -->
+            <div class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+              <button @click="goTo('participants')" class="text-christmas-green hover:underline" x-data="navigation" x-text="$t('groups.breadcrumb.step1Done')"></button>
+              <span>→</span>
+              <span class="font-semibold text-christmas-red" x-text="$t('groups.breadcrumb.step2')"></span>
+              <span>→</span>
+              <span class="text-gray-400" x-text="$t('groups.breadcrumb.step3')"></span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+              🎄 <span x-text="$t('groups.createTitle')"></span>
+            </h2>
+            <p class="text-gray-600 mb-4 text-sm" x-text="$t('groups.description')"></p>
+
+            <div x-show="!canCreateGroups" class="text-center py-6 text-gray-500" x-cloak>
+              <p x-text="$t('groups.minParticipants')"></p>
+            </div>
+
+            <div x-show="canCreateGroups" x-cloak>
+              <!-- Create Group Button/Form -->
+              <div class="mb-6">
+                <button
+                  x-show="!isCreatingGroup"
+                  @click="showCreateForm"
+                  class="btn btn-secondary"
+                  x-text="$t('groups.createNewButton')"
+                >
+                </button>
+
+                <div x-show="isCreatingGroup" class="flex gap-3" x-cloak>
+                  <input
+                    type="text"
+                    x-model="newGroupName"
+                    @input="clearGroupError"
+                    @keydown="handleGroupNameKeyPress($event)"
+                    id="new-group-input"
+                    :placeholder="$t('groups.enterGroupName')"
+                    class="input flex-1"
+                    :class="{ 'input-error': groupError }"
+                    maxlength="30"
+                  />
+                  <button @click="createGroup" class="btn btn-primary" x-text="$t('groups.createButtonShort')"></button>
+                  <button @click="hideCreateForm" class="btn btn-outline" x-text="$t('common.cancel')"></button>
+                </div>
+                <p x-show="groupError" x-text="groupError" class="text-red-600 text-sm mt-2" x-cloak></p>
+              </div>
+
+              <!-- Groups List -->
+              <div x-show="!hasGroups" class="text-center py-6 text-gray-500" x-cloak>
+                <p x-text="$t('groups.noGroups')"></p>
+              </div>
+
+              <div x-show="hasGroups" class="space-y-4" x-cloak>
+                <template x-for="group in groups" :key="group.id">
+                  <div class="border-2 border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                      <button
+                        @click="toggleGroup(group.id)"
+                        class="flex items-center gap-2 flex-1 text-left"
+                      >
+                        <span
+                          x-text="isExpanded(group.id) ? '▼' : '▶'"
+                          class="text-xs text-gray-500"
+                        ></span>
+                        <h3 class="font-bold text-lg" x-text="group.name"></h3>
+                        <span class="badge badge-primary" x-text="group.participantIds.length + ' ' + $t('groups.members')"></span>
+                      </button>
+                      <button
+                        @click="deleteGroup(group.id)"
+                        class="text-red-600 hover:text-red-700 text-sm ml-4"
+                        x-text="$t('groups.deleteButton')"
+                      >
+                      </button>
+                    </div>
+
+                    <div x-show="isExpanded(group.id)" x-cloak>
+                      <!-- Group Members -->
+                      <div class="mb-3">
+                        <template x-for="participantId in group.participantIds" :key="participantId">
+                          <div class="inline-flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1 m-1">
+                            <span x-text="getParticipantName(participantId)"></span>
+                            <button
+                              @click="removeFromGroup(group.id, participantId)"
+                              class="text-gray-500 hover:text-red-600 text-sm"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </template>
+                      </div>
+
+                      <!-- Add Participant to Group -->
+                      <div x-show="getAvailableParticipants(group.id).length > 0" x-cloak>
+                        <select
+                          @change="quickAddToGroup(group.id, $event)"
+                          class="input text-sm"
+                        >
+                          <option value="" x-text="$t('groups.addParticipant')"></option>
+                          <template x-for="p in getAvailableParticipants(group.id)" :key="p.id">
+                            <option :value="p.id" x-text="p.name"></option>
+                          </template>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Next Button -->
+            <div class="mt-6 flex justify-end">
+              <button @click="goTo('assignments')" x-data="navigation" class="btn btn-primary">
+                <span x-text="$t('groups.nextButton')"></span> →
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Assignments Page -->
+        <div x-show="isPage('assignments')" x-cloak class="container mx-auto px-4 max-w-6xl space-y-8">
+          <!-- Generate Assignment Section -->
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8" x-data="assignmentGenerator">
+            <!-- Breadcrumbs -->
+            <div class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600" x-data="navigation">
+              <button @click="goTo('participants')" class="text-christmas-green hover:underline" x-text="$t('assignments.breadcrumb.step1Done')"></button>
+              <span>→</span>
+              <button @click="goTo('groups')" class="text-christmas-green hover:underline" x-text="$t('assignments.breadcrumb.step2Done')"></button>
+              <span>→</span>
+              <span class="font-semibold text-christmas-red" x-text="$t('assignments.breadcrumb.step3')"></span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+              🎁 <span x-text="$t('assignments.title')"></span>
+            </h2>
+
+            <!-- Can't Generate Message -->
+            <div x-show="!canGenerate" class="text-center py-6" x-cloak>
+              <p class="text-gray-500 mb-4" x-text="minimumParticipantsMessage"></p>
+            </div>
+
+            <!-- Generator Controls -->
+            <div x-show="canGenerate" x-cloak>
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                <div class="text-sm text-gray-600">
+                  <p><span x-text="participantCount"></span> <span x-text="$t('participants.countPlural')"></span></p>
+                  <p x-show="groupCount > 0" x-cloak><span x-text="groupCount"></span> <span x-text="$t('assignments.groupsWithExclusions')"></span></p>
+                </div>
+                <div class="flex gap-3">
+                  <button
+                    x-show="hasCurrentList"
+                    @click="clearCurrent"
+                    class="btn btn-outline"
+                    x-cloak
+                    x-text="$t('assignments.clearCurrent')"
+                  >
+                  </button>
+                  <button
+                    @click="generate"
+                    :disabled="isGenerating"
+                    class="btn btn-primary disabled:opacity-50"
+                  >
+                    <span x-show="!isGenerating">🎲 <span x-text="generateButtonLabel"></span></span>
+                    <span x-show="isGenerating" x-text="$t('assignments.generating')"></span>
+                  </button>
+                </div>
+              </div>
+              <p x-show="error" x-text="error" class="text-red-600 text-sm text-center" x-cloak></p>
+            </div>
+          </section>
+
+          <!-- Assignment Viewer Component -->
+          <section x-data="assignmentViewer" id="assignment-viewer" x-show="hasCurrentList" x-cloak class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">
+                🎅 <span x-text="$t('assignments.secretSantaAssignments')"></span>
+              </h2>
+              <div class="text-sm text-gray-600">
+                <span x-text="revealedCount"></span>/<span x-text="assignments.length"></span> <span x-text="$t('assignments.revealed')"></span>
+              </div>
+            </div>
+
+            <p class="text-gray-600 text-sm mb-6" x-text="$t('assignments.clickToReveal')"></p>
+
+            <!-- Assignments Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <template x-for="assignment in assignments" :key="assignment.id">
+                <button
+                  @click="openVerificationModal(assignment)"
+                  class="card text-left hover:shadow-xl transition-all"
+                  :class="isRevealed(assignment) ? 'bg-green-50 border-2 border-green-300' : 'hover:border-christmas-red border-2 border-transparent'"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="font-bold text-lg text-gray-800" x-text="getParticipantName(assignment.giverId)"></p>
+                      <p class="text-xs text-gray-500 mt-1" x-show="isRevealed(assignment)" x-cloak>
+                        <span x-text="$t('assignments.revealedAt')"></span> <span x-text="formatDate(assignment.revealedAt)"></span>
+                      </p>
+                    </div>
+                    <div class="text-2xl">
+                      <span x-show="!isRevealed(assignment)">🎁</span>
+                      <span x-show="isRevealed(assignment)" class="text-green-600">✓</span>
+                    </div>
+                  </div>
+                </button>
+              </template>
+            </div>
+
+            <!-- Verification Modal -->
+            <div
+              x-show="verificationModal.isOpen"
+              @click.self="closeVerificationModal"
+              class="modal-backdrop"
+              x-cloak
+            >
+              <div class="modal-content" @click.stop>
+                <div class="mb-6">
+                  <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                    🎅 <span x-text="$t('viewer.verifyIdentity')"></span>
+                  </h3>
+                  <p class="text-gray-600" x-text="$t('viewer.enterName')"></p>
+                </div>
+
+                <div x-show="!verificationModal.isRevealing" x-cloak>
+                  <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" x-text="$t('viewer.yourName')"></label>
+                    <input
+                      type="text"
+                      x-model="verificationModal.inputName"
+                      @input="clearVerificationError"
+                      @keydown="handleVerificationKeyPress($event)"
+                      id="verification-name-input"
+                      :placeholder="$t('viewer.namePlaceholder')"
+                      class="input"
+                      :class="{ 'input-error': verificationModal.error }"
+                    />
+                    <p x-show="verificationModal.error" x-text="verificationModal.error" class="text-red-600 text-sm mt-2" x-cloak></p>
+                  </div>
+
+                  <div class="flex gap-3">
+                    <button @click="verifyAndReveal" class="btn btn-primary flex-1" x-text="$t('viewer.revealAssignment')"></button>
+                    <button @click="closeVerificationModal" class="btn btn-outline" x-text="$t('common.cancel')"></button>
+                  </div>
+                </div>
+
+                <div x-show="verificationModal.isRevealing" class="text-center py-8" x-cloak>
+                  <div class="mb-6">
+                    <p class="text-lg text-gray-700 mb-2">
+                      <span x-text="giverName"></span><span x-text="$t('viewer.youAreSecretSantaFor')"></span>
+                    </p>
+                    <p class="text-4xl font-bold text-christmas-red mb-4" x-text="receiverName"></p>
+                    <p class="text-sm text-gray-500">
+                      <span x-text="$t('viewer.closeIn', { seconds: verificationModal.revealCountdown })"></span>
+                    </p>
+                  </div>
+                  <button @click="closeVerificationModal" class="btn btn-primary" x-text="$t('viewer.closeNow')"></button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- History Page -->
+        <div x-show="isPage('history')" x-cloak class="container mx-auto px-4 max-w-4xl">
+          <div x-data="historyModal" x-init="isOpen = false; open()">
+            <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+              <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                📜 <span x-text="$t('history.title')"></span>
+              </h2>
+
+              <div x-show="!hasHistory" class="text-center py-8 text-gray-500" x-cloak>
+                <p class="text-lg" x-text="$t('history.noHistory')"></p>
+                <p class="text-sm mt-2" x-text="$t('history.description')"></p>
+              </div>
+
+              <div x-show="hasHistory && !selectedList" x-cloak>
+                <div class="mb-4 flex justify-between items-center">
+                  <p class="text-sm text-gray-600">
+                    <span x-text="$t('history.lastGenerated')"></span> <span x-text="history.length"></span> <span x-text="$t('history.generatedLists')"></span>
+                  </p>
+                  <button
+                    @click="clearHistory"
+                    class="text-sm text-red-600 hover:text-red-700"
+                    x-text="$t('history.clearAll')"
+                  >
+                  </button>
+                </div>
+
+                <div class="space-y-3">
+                  <template x-for="list in history" :key="list.id">
+                    <div
+                      class="border-2 rounded-lg p-4 hover:border-christmas-red transition-all"
+                      :class="isCurrentList(list.id) ? 'bg-green-50 border-green-300' : 'border-gray-200'"
+                    >
+                      <div class="flex items-start justify-between mb-2">
+                        <div>
+                          <p class="font-medium text-gray-800" x-text="list && formatTimestamp(list.timestamp)"></p>
+                          <p class="text-xs text-gray-500" x-text="list && formatRelativeTime(list.timestamp)"></p>
+                        </div>
+                        <span
+                          x-show="isCurrentList(list.id)"
+                          class="badge badge-secondary text-xs"
+                          x-cloak
+                          x-text="$t('history.current')"
+                        >
+                        </span>
+                      </div>
+
+                      <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                        <span><span x-text="getAssignmentCount(list)"></span> <span x-text="$t('history.participants')"></span></span>
+                        <span><span x-text="getRevealedCount(list)"></span> <span x-text="$t('history.revealed')"></span></span>
+                        <span x-show="getGroupNames(list).length > 0" x-cloak><span x-text="getGroupNames(list).length"></span> <span x-text="$t('history.groups')"></span></span>
+                      </div>
+
+                      <div class="flex gap-2">
+                        <button
+                          @click="selectList(list)"
+                          class="btn btn-primary text-sm flex-1"
+                          x-text="$t('history.viewDetails')"
+                        >
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- List Details View -->
+              <div x-show="selectedList" x-cloak>
+                <button @click="deselectList" class="text-sm text-gray-600 hover:text-gray-800 mb-4">
+                  ← <span x-text="$t('history.backToHistory')"></span>
+                </button>
+
+                <div class="border-2 border-gray-200 rounded-lg p-4 mb-4">
+                  <p class="font-medium text-gray-800 mb-2" x-text="selectedList && formatTimestamp(selectedList.timestamp)"></p>
+                  <div class="text-sm text-gray-600 mb-3">
+                    <p><span x-text="selectedList && selectedList.participants.length"></span> <span x-text="$t('history.participants')"></span></p>
+                    <p><span x-text="selectedList && getRevealedCount(selectedList)"></span> <span x-text="$t('history.revealed')"></span></p>
+                  </div>
+                  <button
+                    @click="remakeWithSameSettings(selectedList)"
+                    class="btn btn-secondary text-sm w-full"
+                  >
+                    🔄 <span x-text="$t('history.remake')"></span>
+                  </button>
+                </div>
+
+                <div class="space-y-2">
+                  <template x-for="(assignment, index) in (selectedList?.assignments || [])" :key="assignment.id">
+                    <div class="w-full rounded-lg text-sm" :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'">
+                      <button
+                        @click="openVerificationModal(assignment)"
+                        :disabled="!allowHistoryAssignmentView"
+                        class="w-full p-3 transition-all"
+                        :class="allowHistoryAssignmentView ? 'hover:bg-gray-100 cursor-pointer' : 'cursor-not-allowed opacity-75'"
+                      >
+                        <div class="flex items-center justify-between gap-2">
+                          <span x-text="getParticipantName(selectedList, assignment.giverId)" class="font-medium flex-1 text-left"></span>
+                          <span class="text-gray-400 flex-shrink-0">→</span>
+                          <span class="text-gray-400 flex-1 text-right">???</span>
+                          <span x-show="allowHistoryAssignmentView" class="text-xs text-gray-500 flex-shrink-0">🔍</span>
+                        </div>
+                      </button>
+                      <div x-show="assignment.revealed && assignment.revealedAt" class="px-3 pb-2 text-xs text-gray-500" x-cloak>
+                        <span x-text="$t('history.revealedAt')"></span> <span x-text="formatTimestamp(assignment.revealedAt)"></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Verification Modal for History -->
+                <div
+                  x-show="verificationModal.isOpen"
+                  @click.self="closeVerificationModal"
+                  class="modal-backdrop"
+                  x-cloak
+                >
+                  <div class="modal-content" @click.stop>
+                    <div class="mb-6">
+                      <h3 class="text-2xl font-bold text-gray-800 mb-2" x-text="$t('viewer.verifyIdentity')"></h3>
+                      <p class="text-gray-600" x-text="$t('viewer.enterName')"></p>
+                    </div>
+
+                    <div x-show="!verificationModal.isRevealing" x-cloak>
+                      <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" x-text="$t('viewer.yourName')"></label>
+                        <input
+                          type="text"
+                          x-model="verificationModal.inputName"
+                          @input="clearVerificationError"
+                          @keydown="handleVerificationKeyPress($event)"
+                          id="history-verification-name-input"
+                          :placeholder="$t('viewer.namePlaceholder')"
+                          class="input"
+                          :class="{ 'input-error': verificationModal.error }"
+                        />
+                        <p x-show="verificationModal.error" x-text="verificationModal.error" class="text-red-600 text-sm mt-2" x-cloak></p>
+                      </div>
+
+                      <div class="flex gap-3">
+                        <button @click="verifyAndReveal" class="btn btn-primary flex-1" x-text="$t('viewer.revealAssignment')"></button>
+                        <button @click="closeVerificationModal" class="btn btn-outline" x-text="$t('common.cancel')"></button>
+                      </div>
+                    </div>
+
+                    <div x-show="verificationModal.isRevealing" class="text-center py-8" x-cloak>
+                      <div class="mb-6">
+                        <p class="text-lg text-gray-700 mb-2">
+                          <span x-text="giverName"></span>, <span x-text="$t('viewer.youAreSecretSantaFor')"></span>
+                        </p>
+                        <p class="text-4xl font-bold text-christmas-red mb-4" x-text="receiverName"></p>
+                        <p class="text-sm text-gray-500">
+                          <span x-text="$t('viewer.closeIn', { seconds: verificationModal.revealCountdown })"></span>
+                        </p>
+                      </div>
+                      <button @click="closeVerificationModal" class="btn btn-primary" x-text="$t('viewer.closeNow')"></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Config Page -->
+        <div x-show="isPage('config')" x-cloak class="container mx-auto px-4 max-w-4xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8" x-data="configPage">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">⚙️ <span x-text="$t('config.title')"></span></h2>
+
+            <!-- Max History Count Setting -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-gray-800 mb-3" x-text="$t('config.historySettings')"></h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2" x-text="$t('config.maxHistory.label')">
+                </label>
+                <p class="text-sm text-gray-600 mb-3" x-text="$t('config.maxHistory.description')">
+                </p>
+                <div class="flex items-center gap-3 mb-2">
+                  <input
+                    type="number"
+                    x-model="tempMaxHistoryCount"
+                    @input="updateMaxHistoryInput($event.target.value)"
+                    min="1"
+                    max="50"
+                    class="input w-32"
+                  />
+                  <span class="text-sm text-gray-600">
+                    (<span x-text="$t('config.maxHistory.currently')"></span> <span x-text="maxHistoryCount"></span>,
+                    <span x-text="$t('config.maxHistory.inStorage')"></span> <span x-text="currentHistoryCount"></span>)
+                  </span>
+                </div>
+                <div class="flex gap-2" x-show="hasUnsavedChanges">
+                  <button @click="saveMaxHistoryCount" class="btn btn-primary text-sm" x-text="$t('config.save')">
+                  </button>
+                  <button @click="cancelMaxHistoryCount" class="btn btn-outline text-sm" x-text="$t('common.cancel')">
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Allow History Assignment View Setting -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-gray-800 mb-3" x-text="$t('config.privacySettings')"></h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    :checked="allowHistoryAssignmentView"
+                    @change="toggleAllowHistoryAssignmentView"
+                    class="w-5 h-5 text-christmas-red rounded focus:ring-christmas-red"
+                  />
+                  <div>
+                    <p class="font-medium text-gray-800" x-text="$t('config.allowHistoryView.label')"></p>
+                    <p class="text-sm text-gray-600" x-text="$t('config.allowHistoryView.description')">
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Session Management -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-gray-800 mb-3" x-text="$t('config.sessionManagement')"></h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <p class="text-sm text-gray-600 mb-3" x-text="$t('config.resetSession.description')">
+                </p>
+                <button @click="resetCurrentSession" class="btn btn-outline text-sm">
+                  🔄 <span x-text="$t('config.resetSession.button')"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Reset to Defaults -->
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 mb-3" x-text="$t('config.dangerZone')"></h3>
+              <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                <p class="text-sm text-gray-700 mb-3" x-text="$t('config.resetDefaults.description')">
+                </p>
+                <button @click="resetToDefaults" class="btn bg-red-600 hover:bg-red-700 text-white text-sm">
+                  ⚠️ <span x-text="$t('config.resetDefaults.button')"></span>
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- How-To Page -->
+        <div x-show="isPage('how-to')" x-cloak x-data="howToPage" class="container mx-auto px-4 max-w-4xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ <span x-text="$t('howTo.title')"></span></h2>
+
+            <div class="space-y-8">
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">1️⃣</span> <span x-text="$t('howTo.step1.title')"></span>
+                </h3>
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step1.description')">
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li x-text="$t('howTo.step1.detail1')"></li>
+                  <li x-text="$t('howTo.step1.detail2')"></li>
+                  <li x-text="$t('howTo.step1.detail3')"></li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">2️⃣</span> <span x-text="$t('howTo.step2.title')"></span>
+                </h3>
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step2.description')">
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li x-text="$t('howTo.step2.detail1')"></li>
+                  <li x-text="$t('howTo.step2.detail2')"></li>
+                  <li x-text="$t('howTo.step2.detail3')"></li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">3️⃣</span> <span x-text="$t('howTo.step3.title')"></span>
+                </h3>
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step3.description')">
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li x-text="$t('howTo.step3.detail1')"></li>
+                  <li x-text="$t('howTo.step3.detail2')"></li>
+                  <li x-text="$t('howTo.step3.detail3')"></li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">4️⃣</span> <span x-text="$t('howTo.step4.title')"></span>
+                </h3>
+                <p class="text-gray-700 mb-2" x-text="$t('howTo.step4.description')">
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li x-text="$t('howTo.step4.detail1')"></li>
+                  <li x-text="$t('howTo.step4.detail2')"></li>
+                  <li x-text="$t('howTo.step4.detail3')"></li>
+                  <li x-text="$t('howTo.step4.detail4')"></li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">5️⃣</span> <span x-text="$t('howTo.step5.title')"></span>
+                </h3>
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step5.description')">
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li x-text="$t('howTo.step5.detail1')"></li>
+                  <li x-text="$t('howTo.step5.detail2')"></li>
+                  <li x-text="$t('howTo.step5.detail3')"></li>
+                  <li x-text="$t('howTo.step5.detail4')"></li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">6️⃣</span> <span x-text="$t('howTo.step6.title')"></span>
+                </h3>
+                <p class="text-gray-700 mb-2" x-html="$t('howTo.step6.description')">
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li x-html="$t('howTo.step6.detail1')"></li>
+                  <li x-html="$t('howTo.step6.detail2')"></li>
+                  <li x-html="$t('howTo.step6.detail3')"></li>
+                  <li x-html="$t('howTo.step6.detail4')"></li>
+                </ul>
+              </div>
+
+              <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-8">
+                <h4 class="font-bold text-blue-900 mb-2">💡 <span x-text="$t('howTo.tips.title')"></span></h4>
+                <ul class="text-blue-800 space-y-1 text-sm">
+                  <li>• <span x-text="$t('howTo.tips.tip1')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip2')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip3')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip4')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip5')"></span></li>
+                  <li>• <span x-text="$t('howTo.tips.tip6')"></span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="mt-8 text-center">
+              <button @click="goTo('participants')" class="btn btn-primary" x-text="$t('howTo.startButton')">
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="text-center py-6 text-gray-600 text-sm">
+        <p x-text="$t('common.footer')"></p>
+      </footer>
+    </div>
+
+    <!-- Global Modal (replaces alert/confirm) -->
+    <div
+      x-data="$store.globalModal"
+      x-show="isOpen"
+      x-cloak
+      @keydown.window="handleEscape($event)"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style="display: none;"
+    >
+      <!-- Backdrop -->
+      <div
+        class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+        @click="type === 'alert' ? close() : handleCancel()"
+      ></div>
+
+      <!-- Modal -->
+      <div
+        class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+      >
+        <!-- Message -->
+        <div class="mb-6">
+          <p class="text-lg text-gray-800" x-text="message"></p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 justify-end">
+          <template x-if="type === 'confirm'">
+            <button
+              @click="handleCancel"
+              class="btn btn-outline"
+              x-text="$t('common.cancel')"
+            ></button>
+          </template>
+          <button
+            @click="type === 'alert' ? close() : handleConfirm()"
+            class="btn btn-primary"
+            x-text="type === 'alert' ? $t('common.close') : $t('common.confirm')"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
