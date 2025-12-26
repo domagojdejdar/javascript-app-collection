@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Secret Santa enrollment and assignment application" />
+    <title>Secret Santa - Gift Exchange Manager</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="bg-gradient-to-br from-christmas-green via-gray-50 to-christmas-red min-h-screen">
+    <div id="app" x-data="pageContainer" class="min-h-screen">
+      <!-- Hamburger Navigation -->
+      <nav x-data="navigation" @keydown.escape="handleKeyPress($event)" class="fixed top-0 left-0 right-0 bg-white shadow-lg z-50">
+        <div class="container mx-auto px-4">
+          <div class="flex items-center justify-between h-16">
+            <!-- Logo/Title -->
+            <button @click="goTo('home')" class="flex items-center gap-2 text-xl font-bold text-christmas-red hover:text-red-700 transition-colors">
+              🎅 <span x-text="$t('home.title')"></span>
+            </button>
+
+            <!-- Hamburger Button -->
+            <button
+              @click="toggleMenu"
+              class="p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-christmas-red"
+              aria-label="Toggle menu"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path x-show="!isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path x-show="isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Menu Dropdown -->
+        <div
+          x-show="isMenuOpen"
+          x-transition:enter="transition ease-out duration-200"
+          x-transition:enter-start="opacity-0 -translate-y-2"
+          x-transition:enter-end="opacity-100 translate-y-0"
+          x-transition:leave="transition ease-in duration-150"
+          x-transition:leave-start="opacity-100 translate-y-0"
+          x-transition:leave-end="opacity-0 -translate-y-2"
+          @click.away="closeMenu"
+          class="absolute top-full left-0 right-0 bg-white border-t shadow-lg md:left-auto md:right-4 md:w-80"
+          x-cloak
+        >
+          <div class="container mx-auto px-4 py-4 md:px-0">
+            <!-- Get Started / Continue Button -->
+            <button
+              @click="handleGetStarted()"
+              class="w-full text-left px-4 py-3 rounded-lg transition-colors mb-4 flex items-center gap-3 bg-christmas-red text-white hover:bg-red-700 font-semibold"
+            >
+              <span x-text="getStartedIcon" class="text-xl"></span>
+              <span x-text="getStartedLabel" class="flex-1"></span>
+            </button>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-200 mb-4"></div>
+
+            <!-- Menu Items -->
+            <template x-for="item in menuItems" :key="item.name">
+              <button
+                @click="goTo(item.name)"
+                :class="isActive(item.name) ? 'bg-christmas-green text-white' : 'text-gray-700 hover:bg-gray-100'"
+                class="w-full text-left px-4 py-3 rounded-lg transition-colors mb-2 flex items-center gap-3"
+              >
+                <span x-text="item.icon" class="text-xl"></span>
+                <span x-text="item.label" class="font-medium"></span>
+              </button>
+            </template>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-200 my-4"></div>
+
+            <!-- Reset Current Session Button -->
+            <button
+              x-show="hasSessionData"
+              @click="resetCurrentSession()"
+              class="w-full text-left px-4 py-3 rounded-lg transition-colors text-red-600 hover:bg-red-50 flex items-center gap-3"
+              x-cloak
+            >
+              <span class="text-xl">🔄</span>
+              <span class="font-medium">Reset Current Session</span>
+            </button>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-200 my-4"></div>
+
+            <!-- Language Selector -->
+            <div class="px-4">
+              <p class="text-xs text-gray-500 mb-2 uppercase tracking-wide">Language</p>
+              <div class="flex gap-2">
+                <template x-for="(langInfo, langCode) in languageOptions" :key="langCode">
+                  <button
+                    @click="switchLanguage(langCode)"
+                    :class="currentLanguage === langCode ? 'bg-christmas-green text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="flex-1 px-3 py-2 rounded-lg transition-colors text-center text-sm font-medium"
+                    :title="langInfo.name"
+                  >
+                    <span class="text-lg" x-text="langInfo.flag"></span>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content - Add padding-top for fixed nav -->
+      <main class="pt-20 pb-8">
+        <!-- Home Page -->
+        <div x-show="isPage('home')" x-data="homePage" x-cloak class="container mx-auto px-4 max-w-4xl">
+          <!-- Restore State Prompt -->
+          <div x-show="showRestorePrompt" class="mb-8 bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6" x-cloak>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">💾 <span x-text="$t('home.restore.title')"></span></h3>
+            <p class="text-gray-600 mb-4" x-text="$t('home.restore.description')"></p>
+            <div class="flex gap-3">
+              <button @click="restoreState" class="btn btn-primary" x-text="$t('home.restore.restoreButton')"></button>
+              <button @click="startFresh" class="btn btn-outline" x-text="$t('home.restore.startFreshButton')"></button>
+            </div>
+          </div>
+
+          <!-- Hero Section -->
+          <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-4">🎅 <span x-text="$t('home.title')"></span></h1>
+            <p class="text-2xl text-gray-600 mb-2" x-text="$t('home.subtitle')"></p>
+            <p class="text-lg text-gray-500" x-text="$t('home.description')"></p>
+          </div>
+
+          <!-- Description -->
+          <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">What is Secret Santa?</h2>
+            <p class="text-gray-700 mb-4 leading-relaxed">
+              Secret Santa is a fun holiday tradition where a group of people exchange gifts anonymously.
+              Each participant is randomly assigned another person to give a gift to, creating an element
+              of surprise and excitement!
+            </p>
+            <p class="text-gray-700 leading-relaxed">
+              This app helps you organize your Secret Santa event by managing participants, creating
+              exclusion groups (for couples or family members), and generating random assignments while
+              keeping everyone's recipient a secret.
+            </p>
+          </div>
+
+          <!-- Features -->
+          <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">✨ Features</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">👥</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1">Manage Participants</h3>
+                  <p class="text-gray-600 text-sm">Easily add and remove people joining your Secret Santa</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">🎄</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1">Create Groups</h3>
+                  <p class="text-gray-600 text-sm">Set exclusion rules so couples or family members don't draw each other</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">🎲</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1">Smart Assignment</h3>
+                  <p class="text-gray-600 text-sm">Generate random assignments that respect your group constraints</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">🔒</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1">Secure Reveal</h3>
+                  <p class="text-gray-600 text-sm">Name verification ensures only the right person sees their assignment</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">⏱️</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1">Timed Viewing</h3>
+                  <p class="text-gray-600 text-sm">Assignments display for 5 seconds to prevent accidental reveals</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">📜</span>
+                <div>
+                  <h3 class="font-bold text-lg mb-1">History Tracking</h3>
+                  <p class="text-gray-600 text-sm">Save and review your last 5 generated lists</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Get Started -->
+          <div class="text-center">
+            <button @click="goTo('participants')" class="btn btn-primary text-xl px-8 py-4">
+              🎁 Get Started
+            </button>
+            <p class="text-gray-500 text-sm mt-4">or check out the <button @click="goTo('how-to')" class="text-christmas-red hover:underline">how-to guide</button></p>
+          </div>
+        </div>
+
+        <!-- Participants Page -->
+        <div x-show="isPage('participants')" x-cloak class="container mx-auto px-4 max-w-6xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <!-- Breadcrumbs -->
+            <div class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+              <span class="font-semibold text-christmas-red">1. Participants</span>
+              <span>→</span>
+              <span class="text-gray-400">2. Groups (Optional)</span>
+              <span>→</span>
+              <span class="text-gray-400">3. Generate Assignments</span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+              👥 Manage Participants
+            </h2>
+
+            <!-- Name Input Component -->
+            <div x-data="nameInput" class="mb-6">
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1">
+                  <input
+                    type="text"
+                    x-model="name"
+                    @input="clearError"
+                    @keydown="handleKeyPress($event)"
+                    placeholder="Enter participant name..."
+                    class="input"
+                    :class="{ 'input-error': error }"
+                    maxlength="50"
+                  />
+                </div>
+                <button
+                  @click="submit"
+                  :disabled="!isValid || isSubmitting"
+                  class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  <span x-show="!isSubmitting">Add Participant</span>
+                  <span x-show="isSubmitting">Adding...</span>
+                </button>
+              </div>
+              <p x-show="error" x-text="error" class="text-red-600 text-sm mt-2" x-cloak></p>
+            </div>
+
+            <!-- Participant List Component -->
+            <div x-data="participantList">
+              <div x-show="!hasParticipants" class="text-center py-8 text-gray-500" x-cloak>
+                <p class="text-lg">No participants yet</p>
+                <p class="text-sm">Add participants above to get started</p>
+              </div>
+
+              <div x-show="hasParticipants" x-cloak>
+                <div class="flex justify-between items-center mb-4">
+                  <p class="text-sm text-gray-600">
+                    <span x-text="count"></span> participant<span x-show="count !== 1">s</span>
+                  </p>
+                  <button
+                    @click="clearAll"
+                    class="text-sm text-red-600 hover:text-red-700 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                </div>
+
+                <div class="space-y-2">
+                  <template x-for="participant in participants" :key="participant.id">
+                    <div class="card flex items-center justify-between">
+                      <div class="flex-1">
+                        <p class="font-medium text-gray-800" x-text="participant.name"></p>
+                        <p
+                          x-show="hasGroups(participant.id)"
+                          x-text="'Groups: ' + getGroupsText(participant.id)"
+                          class="text-xs text-gray-500 mt-1"
+                          x-cloak
+                        ></p>
+                      </div>
+                      <button
+                        @click="remove(participant.id)"
+                        :class="isConfirmingDelete(participant.id) ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-red-600'"
+                        class="ml-4 p-2 rounded-lg transition-all"
+                        :title="isConfirmingDelete(participant.id) ? 'Click again to confirm' : 'Remove participant'"
+                      >
+                        <span x-show="!isConfirmingDelete(participant.id)">✕</span>
+                        <span x-show="isConfirmingDelete(participant.id)">Delete?</span>
+                      </button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Next Button -->
+            <div class="mt-6 flex justify-end">
+              <button @click="goTo('groups')" x-data="navigation" class="btn btn-primary">
+                Next: Groups (Optional) →
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Groups Page -->
+        <div x-show="isPage('groups')" x-cloak class="container mx-auto px-4 max-w-6xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8" x-data="groupManager">
+            <!-- Breadcrumbs -->
+            <div class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+              <button @click="goTo('participants')" class="text-christmas-green hover:underline" x-data="navigation">1. Participants ✓</button>
+              <span>→</span>
+              <span class="font-semibold text-christmas-red">2. Groups (Optional)</span>
+              <span>→</span>
+              <span class="text-gray-400">3. Generate Assignments</span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+              🎄 Create Groups (Optional)
+            </h2>
+            <p class="text-gray-600 mb-4 text-sm">
+              Group participants who shouldn't draw each other (e.g., couples, family members)
+            </p>
+
+            <div x-show="!canCreateGroups" class="text-center py-6 text-gray-500" x-cloak>
+              <p>Add at least 2 participants to create groups</p>
+            </div>
+
+            <div x-show="canCreateGroups" x-cloak>
+              <!-- Create Group Button/Form -->
+              <div class="mb-6">
+                <button
+                  x-show="!isCreatingGroup"
+                  @click="showCreateForm"
+                  class="btn btn-secondary"
+                >
+                  + Create New Group
+                </button>
+
+                <div x-show="isCreatingGroup" class="flex gap-3" x-cloak>
+                  <input
+                    type="text"
+                    x-model="newGroupName"
+                    @input="clearGroupError"
+                    @keydown="handleGroupNameKeyPress($event)"
+                    id="new-group-input"
+                    placeholder="Enter group name..."
+                    class="input flex-1"
+                    :class="{ 'input-error': groupError }"
+                    maxlength="30"
+                  />
+                  <button @click="createGroup" class="btn btn-primary">Create</button>
+                  <button @click="hideCreateForm" class="btn btn-outline">Cancel</button>
+                </div>
+                <p x-show="groupError" x-text="groupError" class="text-red-600 text-sm mt-2" x-cloak></p>
+              </div>
+
+              <!-- Groups List -->
+              <div x-show="!hasGroups" class="text-center py-6 text-gray-500" x-cloak>
+                <p>No groups created yet</p>
+              </div>
+
+              <div x-show="hasGroups" class="space-y-4" x-cloak>
+                <template x-for="group in groups" :key="group.id">
+                  <div class="border-2 border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                      <button
+                        @click="toggleGroup(group.id)"
+                        class="flex items-center gap-2 flex-1 text-left"
+                      >
+                        <span
+                          x-text="isExpanded(group.id) ? '▼' : '▶'"
+                          class="text-xs text-gray-500"
+                        ></span>
+                        <h3 class="font-bold text-lg" x-text="group.name"></h3>
+                        <span class="badge badge-primary" x-text="group.participantIds.length + ' members'"></span>
+                      </button>
+                      <button
+                        @click="deleteGroup(group.id)"
+                        class="text-red-600 hover:text-red-700 text-sm ml-4"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <div x-show="isExpanded(group.id)" x-cloak>
+                      <!-- Group Members -->
+                      <div class="mb-3">
+                        <template x-for="participantId in group.participantIds" :key="participantId">
+                          <div class="inline-flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1 m-1">
+                            <span x-text="getParticipantName(participantId)"></span>
+                            <button
+                              @click="removeFromGroup(group.id, participantId)"
+                              class="text-gray-500 hover:text-red-600 text-sm"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </template>
+                      </div>
+
+                      <!-- Add Participant to Group -->
+                      <div x-show="getAvailableParticipants(group.id).length > 0" x-cloak>
+                        <select
+                          @change="quickAddToGroup(group.id, $event)"
+                          class="input text-sm"
+                        >
+                          <option value="">+ Add participant to group</option>
+                          <template x-for="p in getAvailableParticipants(group.id)" :key="p.id">
+                            <option :value="p.id" x-text="p.name"></option>
+                          </template>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Next Button -->
+            <div class="mt-6 flex justify-end">
+              <button @click="goTo('assignments')" x-data="navigation" class="btn btn-primary">
+                Next: Generate Assignments →
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Assignments Page -->
+        <div x-show="isPage('assignments')" x-cloak class="container mx-auto px-4 max-w-6xl space-y-8">
+          <!-- Generate Assignment Section -->
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8" x-data="assignmentGenerator">
+            <!-- Breadcrumbs -->
+            <div class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600" x-data="navigation">
+              <button @click="goTo('participants')" class="text-christmas-green hover:underline">1. Participants ✓</button>
+              <span>→</span>
+              <button @click="goTo('groups')" class="text-christmas-green hover:underline">2. Groups ✓</button>
+              <span>→</span>
+              <span class="font-semibold text-christmas-red">3. Generate Assignments</span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+              🎁 Generate Assignments
+            </h2>
+
+            <!-- Can't Generate Message -->
+            <div x-show="!canGenerate" class="text-center py-6" x-cloak>
+              <p class="text-gray-500 mb-4" x-text="minimumParticipantsMessage"></p>
+            </div>
+
+            <!-- Generator Controls -->
+            <div x-show="canGenerate" x-cloak>
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                <div class="text-sm text-gray-600">
+                  <p><span x-text="participantCount"></span> participants</p>
+                  <p x-show="groupCount > 0" x-text="groupCount + ' groups with exclusions'" x-cloak></p>
+                </div>
+                <div class="flex gap-3">
+                  <button
+                    x-show="hasCurrentList"
+                    @click="clearCurrent"
+                    class="btn btn-outline"
+                    x-cloak
+                  >
+                    Clear Current
+                  </button>
+                  <button
+                    @click="generate"
+                    :disabled="isGenerating"
+                    class="btn btn-primary disabled:opacity-50"
+                  >
+                    <span x-show="!isGenerating" x-text="'🎲 ' + generateButtonLabel"></span>
+                    <span x-show="isGenerating">Generating...</span>
+                  </button>
+                </div>
+              </div>
+              <p x-show="error" x-text="error" class="text-red-600 text-sm text-center" x-cloak></p>
+            </div>
+          </section>
+
+          <!-- Assignment Viewer Component -->
+          <section x-data="assignmentViewer" id="assignment-viewer" x-show="hasCurrentList" x-cloak class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">
+                🎅 Secret Santa Assignments
+              </h2>
+              <div class="text-sm text-gray-600">
+                <span x-text="revealedCount"></span>/<span x-text="assignments.length"></span> revealed
+              </div>
+            </div>
+
+            <p class="text-gray-600 text-sm mb-6">
+              Click on a name to verify and reveal your Secret Santa assignment
+            </p>
+
+            <!-- Assignments Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <template x-for="assignment in assignments" :key="assignment.id">
+                <button
+                  @click="openVerificationModal(assignment)"
+                  class="card text-left hover:shadow-xl transition-all"
+                  :class="isRevealed(assignment) ? 'bg-green-50 border-2 border-green-300' : 'hover:border-christmas-red border-2 border-transparent'"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="font-bold text-lg text-gray-800" x-text="getParticipantName(assignment.giverId)"></p>
+                      <p class="text-xs text-gray-500 mt-1" x-show="isRevealed(assignment)" x-cloak>
+                        Revealed <span x-text="formatDate(assignment.revealedAt)"></span>
+                      </p>
+                    </div>
+                    <div class="text-2xl">
+                      <span x-show="!isRevealed(assignment)">🎁</span>
+                      <span x-show="isRevealed(assignment)" class="text-green-600">✓</span>
+                    </div>
+                  </div>
+                </button>
+              </template>
+            </div>
+
+            <!-- Verification Modal -->
+            <div
+              x-show="verificationModal.isOpen"
+              @click.self="closeVerificationModal"
+              class="modal-backdrop"
+              x-cloak
+            >
+              <div class="modal-content" @click.stop>
+                <div class="mb-6">
+                  <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                    🎅 Verify Your Identity
+                  </h3>
+                  <p class="text-gray-600">
+                    Enter your name to reveal your Secret Santa assignment
+                  </p>
+                </div>
+
+                <div x-show="!verificationModal.isRevealing" x-cloak>
+                  <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      x-model="verificationModal.inputName"
+                      @input="clearVerificationError"
+                      @keydown="handleVerificationKeyPress($event)"
+                      id="verification-name-input"
+                      placeholder="Enter your name..."
+                      class="input"
+                      :class="{ 'input-error': verificationModal.error }"
+                    />
+                    <p x-show="verificationModal.error" x-text="verificationModal.error" class="text-red-600 text-sm mt-2" x-cloak></p>
+                  </div>
+
+                  <div class="flex gap-3">
+                    <button @click="verifyAndReveal" class="btn btn-primary flex-1">
+                      Reveal Assignment
+                    </button>
+                    <button @click="closeVerificationModal" class="btn btn-outline">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+
+                <div x-show="verificationModal.isRevealing" class="text-center py-8" x-cloak>
+                  <div class="mb-6">
+                    <p class="text-lg text-gray-700 mb-2">
+                      <span x-text="giverName"></span>, you are Secret Santa for:
+                    </p>
+                    <p class="text-4xl font-bold text-christmas-red mb-4" x-text="receiverName"></p>
+                    <p class="text-sm text-gray-500">
+                      This will close in <span x-text="verificationModal.revealCountdown"></span> seconds
+                    </p>
+                  </div>
+                  <button @click="closeVerificationModal" class="btn btn-primary">
+                    Close Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- History Page -->
+        <div x-show="isPage('history')" x-cloak class="container mx-auto px-4 max-w-4xl">
+          <div x-data="historyModal" x-init="isOpen = false; open()">
+            <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+              <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                📜 Assignment History
+              </h2>
+
+              <div x-show="!hasHistory" class="text-center py-8 text-gray-500" x-cloak>
+                <p class="text-lg">No history yet</p>
+                <p class="text-sm mt-2">Generate assignments to start building history</p>
+              </div>
+
+              <div x-show="hasHistory && !selectedList" x-cloak>
+                <div class="mb-4 flex justify-between items-center">
+                  <p class="text-sm text-gray-600">
+                    Last <span x-text="history.length"></span> generated lists
+                  </p>
+                  <button
+                    @click="clearHistory"
+                    class="text-sm text-red-600 hover:text-red-700"
+                  >
+                    Clear All History
+                  </button>
+                </div>
+
+                <div class="space-y-3">
+                  <template x-for="list in history" :key="list.id">
+                    <div
+                      class="border-2 rounded-lg p-4 hover:border-christmas-red transition-all"
+                      :class="isCurrentList(list.id) ? 'bg-green-50 border-green-300' : 'border-gray-200'"
+                    >
+                      <div class="flex items-start justify-between mb-2">
+                        <div>
+                          <p class="font-medium text-gray-800" x-text="list && formatTimestamp(list.timestamp)"></p>
+                          <p class="text-xs text-gray-500" x-text="list && formatRelativeTime(list.timestamp)"></p>
+                        </div>
+                        <span
+                          x-show="isCurrentList(list.id)"
+                          class="badge badge-secondary text-xs"
+                          x-cloak
+                        >
+                          Current
+                        </span>
+                      </div>
+
+                      <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                        <span x-text="getAssignmentCount(list) + ' participants'"></span>
+                        <span x-text="getRevealedCount(list) + ' revealed'"></span>
+                        <span x-show="getGroupNames(list).length > 0" x-text="getGroupNames(list).length + ' groups'" x-cloak></span>
+                      </div>
+
+                      <div class="flex gap-2">
+                        <button
+                          @click="selectList(list)"
+                          class="btn btn-primary text-sm flex-1"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- List Details View -->
+              <div x-show="selectedList" x-cloak>
+                <button @click="deselectList" class="text-sm text-gray-600 hover:text-gray-800 mb-4">
+                  ← Back to History
+                </button>
+
+                <div class="border-2 border-gray-200 rounded-lg p-4 mb-4">
+                  <p class="font-medium text-gray-800 mb-2" x-text="selectedList && formatTimestamp(selectedList.timestamp)"></p>
+                  <div class="text-sm text-gray-600 mb-3">
+                    <p><span x-text="selectedList && selectedList.participants.length"></span> participants</p>
+                    <p><span x-text="selectedList && getRevealedCount(selectedList)"></span> revealed</p>
+                  </div>
+                  <button
+                    @click="remakeWithSameSettings(selectedList)"
+                    class="btn btn-secondary text-sm w-full"
+                  >
+                    🔄 Remake with Same Settings
+                  </button>
+                </div>
+
+                <div class="space-y-2">
+                  <template x-for="(assignment, index) in (selectedList?.assignments || [])" :key="assignment.id">
+                    <div class="w-full rounded-lg text-sm" :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'">
+                      <button
+                        @click="openVerificationModal(assignment)"
+                        :disabled="!allowHistoryAssignmentView"
+                        class="w-full p-3 transition-all"
+                        :class="allowHistoryAssignmentView ? 'hover:bg-gray-100 cursor-pointer' : 'cursor-not-allowed opacity-75'"
+                      >
+                        <div class="flex items-center justify-between gap-2">
+                          <span x-text="getParticipantName(selectedList, assignment.giverId)" class="font-medium flex-1 text-left"></span>
+                          <span class="text-gray-400 flex-shrink-0">→</span>
+                          <span class="text-gray-400 flex-1 text-right">???</span>
+                          <span x-show="allowHistoryAssignmentView" class="text-xs text-gray-500 flex-shrink-0">🔍</span>
+                        </div>
+                      </button>
+                      <div x-show="assignment.revealed && assignment.revealedAt" class="px-3 pb-2 text-xs text-gray-500" x-cloak>
+                        Revealed <span x-text="formatTimestamp(assignment.revealedAt)"></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Verification Modal for History -->
+                <div
+                  x-show="verificationModal.isOpen"
+                  @click.self="closeVerificationModal"
+                  class="modal-backdrop"
+                  x-cloak
+                >
+                  <div class="modal-content" @click.stop>
+                    <div class="mb-6">
+                      <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        🎅 Verify Your Identity
+                      </h3>
+                      <p class="text-gray-600">
+                        Enter your name to view this assignment from history
+                      </p>
+                    </div>
+
+                    <div x-show="!verificationModal.isRevealing" x-cloak>
+                      <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                          Your Name
+                        </label>
+                        <input
+                          type="text"
+                          x-model="verificationModal.inputName"
+                          @input="clearVerificationError"
+                          @keydown="handleVerificationKeyPress($event)"
+                          id="history-verification-name-input"
+                          placeholder="Enter your name..."
+                          class="input"
+                          :class="{ 'input-error': verificationModal.error }"
+                        />
+                        <p x-show="verificationModal.error" x-text="verificationModal.error" class="text-red-600 text-sm mt-2" x-cloak></p>
+                      </div>
+
+                      <div class="flex gap-3">
+                        <button @click="verifyAndReveal" class="btn btn-primary flex-1">
+                          Reveal Assignment
+                        </button>
+                        <button @click="closeVerificationModal" class="btn btn-outline">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+
+                    <div x-show="verificationModal.isRevealing" class="text-center py-8" x-cloak>
+                      <div class="mb-6">
+                        <p class="text-lg text-gray-700 mb-2">
+                          <span x-text="giverName"></span>, you were Secret Santa for:
+                        </p>
+                        <p class="text-4xl font-bold text-christmas-red mb-4" x-text="receiverName"></p>
+                        <p class="text-sm text-gray-500">
+                          This will close in <span x-text="verificationModal.revealCountdown"></span> seconds
+                        </p>
+                      </div>
+                      <button @click="closeVerificationModal" class="btn btn-primary">
+                        Close Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Config Page -->
+        <div x-show="isPage('config')" x-cloak class="container mx-auto px-4 max-w-4xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8" x-data="configPage">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">⚙️ Configuration</h2>
+
+            <!-- Max History Count Setting -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-gray-800 mb-3">History Settings</h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Maximum History Count
+                </label>
+                <p class="text-sm text-gray-600 mb-3">
+                  Number of assignment lists to keep in history (1-50). Older entries will be automatically removed.
+                </p>
+                <div class="flex items-center gap-3 mb-2">
+                  <input
+                    type="number"
+                    x-model="tempMaxHistoryCount"
+                    @input="updateMaxHistoryInput($event.target.value)"
+                    min="1"
+                    max="50"
+                    class="input w-32"
+                  />
+                  <span class="text-sm text-gray-600">
+                    (Currently: <span x-text="maxHistoryCount"></span>,
+                    In storage: <span x-text="currentHistoryCount"></span>)
+                  </span>
+                </div>
+                <div class="flex gap-2" x-show="hasUnsavedChanges">
+                  <button @click="saveMaxHistoryCount" class="btn btn-primary text-sm">
+                    Save Changes
+                  </button>
+                  <button @click="cancelMaxHistoryCount" class="btn btn-outline text-sm">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Allow History Assignment View Setting -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-gray-800 mb-3">Privacy Settings</h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    :checked="allowHistoryAssignmentView"
+                    @change="toggleAllowHistoryAssignmentView"
+                    class="w-5 h-5 text-christmas-red rounded focus:ring-christmas-red"
+                  />
+                  <div>
+                    <p class="font-medium text-gray-800">Allow Viewing Assignments in History</p>
+                    <p class="text-sm text-gray-600">
+                      When enabled, you can reveal assignments from past lists in the history page (same verification as current assignments).
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Session Management -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-gray-800 mb-3">Session Management</h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <p class="text-sm text-gray-600 mb-3">
+                  Reset the current session to start fresh with new participants and groups. Your completed assignment lists will remain in history.
+                </p>
+                <button @click="resetCurrentSession" class="btn btn-outline text-sm">
+                  🔄 Reset Current Session
+                </button>
+              </div>
+            </div>
+
+            <!-- Reset to Defaults -->
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 mb-3">Danger Zone</h3>
+              <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                <p class="text-sm text-gray-700 mb-3">
+                  Reset all configuration settings to their default values.
+                </p>
+                <button @click="resetToDefaults" class="btn bg-red-600 hover:bg-red-700 text-white text-sm">
+                  ⚠️ Reset All Settings to Defaults
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- How-To Page -->
+        <div x-show="isPage('how-to')" x-cloak x-data="howToPage" class="container mx-auto px-4 max-w-4xl">
+          <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ How To Use Secret Santa</h2>
+
+            <div class="space-y-8">
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">1️⃣</span> Add Participants
+                </h3>
+                <p class="text-gray-700 mb-2">
+                  Navigate to the <strong>Participants</strong> page and add everyone who will be participating in your Secret Santa exchange.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li>Enter each person's name and click "Add Participant"</li>
+                  <li>You need at least 2 participants to generate assignments</li>
+                  <li>You can remove participants by clicking the × button next to their name</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">2️⃣</span> Create Groups (Optional)
+                </h3>
+                <p class="text-gray-700 mb-2">
+                  If you have couples or family members who shouldn't draw each other, create exclusion groups on the <strong>Groups</strong> page.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li>Click "Create New Group" and give it a name (e.g., "Smith Family")</li>
+                  <li>Add participants to the group using the dropdown</li>
+                  <li>People in the same group will never be assigned to each other</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">3️⃣</span> Generate Assignments
+                </h3>
+                <p class="text-gray-700 mb-2">
+                  Go to the <strong>Assignments</strong> page and click "Generate Assignments" to create your Secret Santa pairings.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li>The system ensures everyone gives and receives exactly once</li>
+                  <li>Group constraints are automatically respected</li>
+                  <li>If generation fails, try adjusting your groups</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">4️⃣</span> Reveal Assignments
+                </h3>
+                <p class="text-gray-700 mb-2">
+                  Each participant can click on their name to see who they're buying a gift for.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li>Click on a participant's name</li>
+                  <li>Enter the exact name to verify identity</li>
+                  <li>The assignment will be displayed for 5 seconds</li>
+                  <li>After viewing, the assignment is marked as "revealed"</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">5️⃣</span> View History
+                </h3>
+                <p class="text-gray-700 mb-2">
+                  Check the <strong>History</strong> page to see your past generated lists.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li>Recent assignment lists are saved (default: 5, configurable in Config)</li>
+                  <li>Click "View Details" to see a specific list</li>
+                  <li>Click "Load List" to make it the current active list</li>
+                  <li>If enabled in Config, you can click on assignments to reveal them with name verification</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="text-3xl">6️⃣</span> Configure Settings
+                </h3>
+                <p class="text-gray-700 mb-2">
+                  Visit the <strong>Config</strong> page to customize your Secret Santa experience.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-6">
+                  <li><strong>Maximum History Count:</strong> Set how many past assignment lists to keep (1-50, default: 5)</li>
+                  <li><strong>Allow Viewing Assignments in History:</strong> Enable/disable the ability to reveal past assignments with name verification</li>
+                  <li><strong>Reset Current Session:</strong> Clear participants, groups, and current list while preserving history</li>
+                  <li><strong>Reset All Settings:</strong> Restore all configuration to default values</li>
+                </ul>
+              </div>
+
+              <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-8">
+                <h4 class="font-bold text-blue-900 mb-2">💡 Tips</h4>
+                <ul class="text-blue-800 space-y-1 text-sm">
+                  <li>• Make sure everyone knows their budget limit before revealing assignments</li>
+                  <li>• Use groups wisely - too many constraints can make it impossible to generate valid assignments</li>
+                  <li>• Your data is saved locally in your browser, so you can close and come back later</li>
+                  <li>• On page refresh, you'll be asked if you want to restore your previous session or start fresh</li>
+                  <li>• Adjust the history limit in Config if you need to keep more or fewer past lists</li>
+                  <li>• Enable "Allow Viewing Assignments in History" if you want to review past assignments securely</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="mt-8 text-center">
+              <button @click="goTo('participants')" class="btn btn-primary">
+                Start Creating Your Secret Santa
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="text-center py-6 text-gray-600 text-sm">
+        <p>Made with ❤️ for spreading holiday cheer</p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
