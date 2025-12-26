@@ -77,7 +77,10 @@ export default () => ({
    * Get the button label (Generate vs Regenerate)
    */
   get generateButtonLabel(): string {
-    return this.hasCurrentList ? 'Regenerate Assignments' : 'Generate Assignments';
+    const i18nStore = (window as any).Alpine?.store('i18n');
+    return this.hasCurrentList
+      ? i18nStore?.t('assignments.regenerate') || 'Regenerate Assignments'
+      : i18nStore?.t('assignments.generate') || 'Generate Assignments';
   },
 
   /**
@@ -86,8 +89,9 @@ export default () => ({
   generate() {
     // If there's a current list with revealed assignments, confirm first
     if (this.hasCurrentList && this.hasRevealedAssignments) {
+      const i18nStore = (window as any).Alpine?.store('i18n');
       const confirmed = confirm(
-        'Regenerating will clear the current assignments, including any that have been revealed. Continue?'
+        i18nStore?.t('assignments.regeneratePrompt') || 'Regenerating will clear the current assignments, including any that have been revealed. Continue?'
       );
 
       if (!confirmed) {
@@ -123,9 +127,10 @@ export default () => ({
    * Get minimum participants message
    */
   get minimumParticipantsMessage(): string {
+    const i18nStore = (window as any).Alpine?.store('i18n');
     const count = this.participantCount;
-    if (count === 0) return 'Add at least 2 participants to generate assignments';
-    if (count === 1) return 'Add 1 more participant to generate assignments';
+    if (count === 0) return i18nStore?.t('assignments.minParticipants') || 'Add at least 2 participants to generate assignments';
+    if (count === 1) return i18nStore?.t('assignments.oneMore') || 'Add 1 more participant to generate assignments';
     return '';
   },
 });

@@ -7,6 +7,13 @@ export default () => ({
   hasUnsavedChanges: false,
 
   /**
+   * Get i18n store
+   */
+  get i18nStore() {
+    return (window as any).Alpine?.store('i18n');
+  },
+
+  /**
    * Get config store
    */
   get configStore() {
@@ -64,7 +71,8 @@ export default () => ({
    */
   saveMaxHistoryCount() {
     if (this.tempMaxHistoryCount < 1 || this.tempMaxHistoryCount > 50) {
-      alert('Max history count must be between 1 and 50');
+      const i18nStore = this.i18nStore;
+      alert(i18nStore?.t('config.maxHistory.error') || 'Max history count must be between 1 and 50');
       return;
     }
 
@@ -74,7 +82,8 @@ export default () => ({
 
     if (this.tempMaxHistoryCount < oldCount && this.currentHistoryCount > this.tempMaxHistoryCount) {
       const removed = this.currentHistoryCount - this.tempMaxHistoryCount;
-      alert(`History trimmed: ${removed} oldest ${removed === 1 ? 'entry' : 'entries'} removed`);
+      const i18nStore = this.i18nStore;
+      alert(i18nStore?.t('config.maxHistory.trimmed', { count: removed }) || `History trimmed: ${removed} oldest ${removed === 1 ? 'entry' : 'entries'} removed`);
     }
   },
 
@@ -97,7 +106,8 @@ export default () => ({
    * Reset all settings to defaults
    */
   resetToDefaults() {
-    if (confirm('Are you sure you want to reset all settings to default values?')) {
+    const i18nStore = this.i18nStore;
+    if (confirm(i18nStore?.t('config.resetDefaults.prompt') || 'Are you sure you want to reset all settings to default values?')) {
       this.configStore?.resetToDefaults();
       this.tempMaxHistoryCount = 5;
       this.hasUnsavedChanges = false;
@@ -109,7 +119,8 @@ export default () => ({
    * If current list has assignments, it will be kept in history
    */
   resetCurrentSession() {
-    if (!confirm('Are you sure you want to reset the current session? This will clear all participants, groups, and the current assignment list. The current list will be saved to history if it has assignments.')) {
+    const i18nStore = this.i18nStore;
+    if (!confirm(i18nStore?.t('config.resetSession.prompt') || 'Are you sure you want to reset the current session? This will clear all participants, groups, and the current assignment list. The current list will be saved to history if it has assignments.')) {
       return;
     }
 
@@ -136,6 +147,6 @@ export default () => ({
       groupsStore.clear();
     }
 
-    alert('Current session has been reset. You can start fresh with new participants and groups.');
+    alert(i18nStore?.t('config.resetSession.success') || 'Current session has been reset. You can start fresh with new participants and groups.');
   },
 });
