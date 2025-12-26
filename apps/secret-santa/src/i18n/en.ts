@@ -22,7 +22,29 @@ export default {
     subtitle: 'Organize your Secret Santa gift exchange with ease',
     welcome: 'Welcome to Secret Santa!',
     description: 'Create a fun and fair Secret Santa gift exchange for your friends, family, or colleagues.',
+    whatIs: {
+      title: 'What is Secret Santa?',
+      description1: 'Secret Santa is a fun holiday tradition where each person in a group is randomly assigned another person to give a gift to. The identity of the gift giver remains secret until the gifts are exchanged.',
+      description2: 'This app helps you organize your Secret Santa exchange by randomly assigning participants while respecting any constraints you set (like preventing family members from drawing each other).',
+    },
     features: {
+      title: 'Features',
+      manage: {
+        title: 'Manage Participants',
+        description: 'Easily add and remove people joining your Secret Santa',
+      },
+      createGroups: {
+        title: 'Create Groups',
+        description: 'Set exclusion rules so couples or family members don\'t draw each other',
+      },
+      smartAssignment: {
+        title: 'Smart Assignment',
+        description: 'Generate random assignments that respect your group constraints',
+      },
+      secureReveal: {
+        title: 'Secure Reveal',
+        description: 'Name verification ensures only the right person sees their assignment',
+      },
       privacy: {
         title: 'Privacy First',
         description: 'Name verification required to view assignments',
@@ -46,18 +68,30 @@ export default {
       restoreButton: 'Restore Previous Session',
       startFreshButton: 'Start Fresh',
     },
+    getStartedButton: 'Get Started',
+    orCheckOut: 'or check out the',
+    howToGuideLink: 'how-to guide',
   },
 
   // Participants page
   participants: {
     title: 'Participants',
-    addPlaceholder: 'Enter participant name',
-    addButton: 'Add',
+    manageTitle: 'Manage Participants',
+    addPlaceholder: 'Enter participant name...',
+    addButton: 'Add Participant',
+    adding: 'Adding...',
     noParticipants: 'No participants yet',
-    addFirst: 'Add participants to get started',
+    addFirst: 'Add participants above to get started',
     count: '{count} participant(s)',
+    countSingular: 'participant',
+    countPlural: 'participants',
     remove: 'Remove',
+    clearAll: 'Clear All',
+    groups: 'Groups',
     breadcrumb: {
+      step1: '1. Participants',
+      step2: '2. Groups (Optional)',
+      step3: '3. Generate Assignments',
       current: 'Participants',
       groups: 'Groups (Optional)',
       assignments: 'Generate Assignments',

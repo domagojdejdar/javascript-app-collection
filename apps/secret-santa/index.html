@@ -130,63 +130,55 @@
 
           <!-- Description -->
           <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">What is Secret Santa?</h2>
-            <p class="text-gray-700 mb-4 leading-relaxed">
-              Secret Santa is a fun holiday tradition where a group of people exchange gifts anonymously.
-              Each participant is randomly assigned another person to give a gift to, creating an element
-              of surprise and excitement!
-            </p>
-            <p class="text-gray-700 leading-relaxed">
-              This app helps you organize your Secret Santa event by managing participants, creating
-              exclusion groups (for couples or family members), and generating random assignments while
-              keeping everyone's recipient a secret.
-            </p>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6" x-text="$t('home.whatIs.title')"></h2>
+            <p class="text-gray-700 mb-4 leading-relaxed" x-text="$t('home.whatIs.description1')"></p>
+            <p class="text-gray-700 leading-relaxed" x-text="$t('home.whatIs.description2')"></p>
           </div>
 
           <!-- Features -->
           <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">✨ Features</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">✨ <span x-text="$t('home.features.title')"></span></h2>
             <div class="grid md:grid-cols-2 gap-6">
               <div class="flex items-start gap-4">
                 <span class="text-3xl">👥</span>
                 <div>
-                  <h3 class="font-bold text-lg mb-1">Manage Participants</h3>
-                  <p class="text-gray-600 text-sm">Easily add and remove people joining your Secret Santa</p>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.manage.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.manage.description')"></p>
                 </div>
               </div>
               <div class="flex items-start gap-4">
                 <span class="text-3xl">🎄</span>
                 <div>
-                  <h3 class="font-bold text-lg mb-1">Create Groups</h3>
-                  <p class="text-gray-600 text-sm">Set exclusion rules so couples or family members don't draw each other</p>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.createGroups.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.createGroups.description')"></p>
                 </div>
               </div>
               <div class="flex items-start gap-4">
                 <span class="text-3xl">🎲</span>
                 <div>
-                  <h3 class="font-bold text-lg mb-1">Smart Assignment</h3>
-                  <p class="text-gray-600 text-sm">Generate random assignments that respect your group constraints</p>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.smartAssignment.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.smartAssignment.description')"></p>
                 </div>
               </div>
               <div class="flex items-start gap-4">
                 <span class="text-3xl">🔒</span>
                 <div>
-                  <h3 class="font-bold text-lg mb-1">Secure Reveal</h3>
-                  <p class="text-gray-600 text-sm">Name verification ensures only the right person sees their assignment</p>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.secureReveal.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.secureReveal.description')"></p>
                 </div>
               </div>
               <div class="flex items-start gap-4">
                 <span class="text-3xl">⏱️</span>
                 <div>
-                  <h3 class="font-bold text-lg mb-1">Timed Viewing</h3>
-                  <p class="text-gray-600 text-sm">Assignments display for 5 seconds to prevent accidental reveals</p>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.timing.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.timing.description')"></p>
                 </div>
               </div>
               <div class="flex items-start gap-4">
                 <span class="text-3xl">📜</span>
                 <div>
-                  <h3 class="font-bold text-lg mb-1">History Tracking</h3>
-                  <p class="text-gray-600 text-sm">Save and review your last 5 generated lists</p>
+                  <h3 class="font-bold text-lg mb-1" x-text="$t('home.features.history.title')"></h3>
+                  <p class="text-gray-600 text-sm" x-text="$t('home.features.history.description')"></p>
                 </div>
               </div>
             </div>
@@ -195,9 +187,9 @@
           <!-- Get Started -->
           <div class="text-center">
             <button @click="goTo('participants')" class="btn btn-primary text-xl px-8 py-4">
-              🎁 Get Started
+              🎁 <span x-text="$t('home.getStartedButton')"></span>
             </button>
-            <p class="text-gray-500 text-sm mt-4">or check out the <button @click="goTo('how-to')" class="text-christmas-red hover:underline">how-to guide</button></p>
+            <p class="text-gray-500 text-sm mt-4"><span x-text="$t('home.orCheckOut')"></span> <button @click="goTo('how-to')" class="text-christmas-red hover:underline" x-text="$t('home.howToGuideLink')"></button></p>
           </div>
         </div>
 
@@ -206,15 +198,15 @@
           <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
             <!-- Breadcrumbs -->
             <div class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-              <span class="font-semibold text-christmas-red">1. Participants</span>
+              <span class="font-semibold text-christmas-red" x-text="$t('participants.breadcrumb.step1')"></span>
               <span>→</span>
-              <span class="text-gray-400">2. Groups (Optional)</span>
+              <span class="text-gray-400" x-text="$t('participants.breadcrumb.step2')"></span>
               <span>→</span>
-              <span class="text-gray-400">3. Generate Assignments</span>
+              <span class="text-gray-400" x-text="$t('participants.breadcrumb.step3')"></span>
             </div>
 
             <h2 class="text-2xl font-bold text-gray-800 mb-6">
-              👥 Manage Participants
+              👥 <span x-text="$t('participants.manageTitle')"></span>
             </h2>
 
             <!-- Name Input Component -->
@@ -226,7 +218,7 @@
                     x-model="name"
                     @input="clearError"
                     @keydown="handleKeyPress($event)"
-                    placeholder="Enter participant name..."
+                    :placeholder="$t('participants.addPlaceholder')"
                     class="input"
                     :class="{ 'input-error': error }"
                     maxlength="50"
@@ -237,8 +229,8 @@
                   :disabled="!isValid || isSubmitting"
                   class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  <span x-show="!isSubmitting">Add Participant</span>
-                  <span x-show="isSubmitting">Adding...</span>
+                  <span x-show="!isSubmitting" x-text="$t('participants.addButton')"></span>
+                  <span x-show="isSubmitting" x-text="$t('participants.adding')"></span>
                 </button>
               </div>
               <p x-show="error" x-text="error" class="text-red-600 text-sm mt-2" x-cloak></p>
@@ -247,20 +239,20 @@
             <!-- Participant List Component -->
             <div x-data="participantList">
               <div x-show="!hasParticipants" class="text-center py-8 text-gray-500" x-cloak>
-                <p class="text-lg">No participants yet</p>
-                <p class="text-sm">Add participants above to get started</p>
+                <p class="text-lg" x-text="$t('participants.noParticipants')"></p>
+                <p class="text-sm" x-text="$t('participants.addFirst')"></p>
               </div>
 
               <div x-show="hasParticipants" x-cloak>
                 <div class="flex justify-between items-center mb-4">
                   <p class="text-sm text-gray-600">
-                    <span x-text="count"></span> participant<span x-show="count !== 1">s</span>
+                    <span x-text="count"></span> <span x-text="count === 1 ? $t('participants.countSingular') : $t('participants.countPlural')"></span>
                   </p>
                   <button
                     @click="clearAll"
                     class="text-sm text-red-600 hover:text-red-700 transition-colors"
+                    x-text="$t('participants.clearAll')"
                   >
-                    Clear All
                   </button>
                 </div>
 

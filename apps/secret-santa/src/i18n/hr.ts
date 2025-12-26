@@ -22,7 +22,29 @@ export default {
     subtitle: 'Organizirajte razmjenu darova s lakoćom',
     welcome: 'Dobrodošli u Tajni Djed Mraz!',
     description: 'Stvorite zabavnu i poštenu razmjenu darova za prijatelje, obitelj ili kolege.',
+    whatIs: {
+      title: 'Što je Tajni Djed Mraz?',
+      description1: 'Tajni Djed Mraz je zabavna božićna tradicija gdje se svakoj osobi u grupi nasumično dodjeljuje druga osoba kojoj treba dati dar. Identitet darivatelja ostaje tajna dok se darovi ne razmijene.',
+      description2: 'Ova aplikacija vam pomaže organizirati razmjenu darova nasumičnim dodjeljivanjem sudionika uz poštivanje svih ograničenja koja postavite (poput sprječavanja članova obitelji da izvlače jedni druge).',
+    },
     features: {
+      title: 'Značajke',
+      manage: {
+        title: 'Upravljanje sudionicima',
+        description: 'Lako dodajte i uklonite ljude koji se pridružuju vašem Tajnom Djed Mrazu',
+      },
+      createGroups: {
+        title: 'Stvaranje grupa',
+        description: 'Postavite pravila isključenja kako parovi ili članovi obitelji ne bi izvlačili jedni druge',
+      },
+      smartAssignment: {
+        title: 'Pametna dodjela',
+        description: 'Generirajte nasumične dodjele koje poštuju vaša grupna ograničenja',
+      },
+      secureReveal: {
+        title: 'Sigurno otkrivanje',
+        description: 'Provjera imena osigurava da samo prava osoba vidi svoju dodjelu',
+      },
       privacy: {
         title: 'Privatnost na prvom mjestu',
         description: 'Potrebna provjera imena za pregled dodjela',
@@ -46,18 +68,30 @@ export default {
       restoreButton: 'Vrati prethodnu sesiju',
       startFreshButton: 'Počni ispočetka',
     },
+    getStartedButton: 'Počni',
+    orCheckOut: 'ili pogledajte',
+    howToGuideLink: 'upute',
   },
 
   // Participants page
   participants: {
     title: 'Sudionici',
-    addPlaceholder: 'Unesite ime sudionika',
-    addButton: 'Dodaj',
+    manageTitle: 'Upravljanje sudionicima',
+    addPlaceholder: 'Unesite ime sudionika...',
+    addButton: 'Dodaj sudionika',
+    adding: 'Dodavanje...',
     noParticipants: 'Još nema sudionika',
-    addFirst: 'Dodajte sudionike za početak',
+    addFirst: 'Dodajte sudionike gore za početak',
     count: '{count} sudionik(a)',
+    countSingular: 'sudionik',
+    countPlural: 'sudionika',
     remove: 'Ukloni',
+    clearAll: 'Očisti sve',
+    groups: 'Grupe',
     breadcrumb: {
+      step1: '1. Sudionici',
+      step2: '2. Grupe (neobavezno)',
+      step3: '3. Generiraj dodjele',
       current: 'Sudionici',
       groups: 'Grupe (neobavezno)',
       assignments: 'Generiraj dodjele',

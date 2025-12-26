@@ -22,7 +22,29 @@ export default {
     subtitle: 'Organisieren Sie Ihren Wichtel-Geschenkaustausch mit Leichtigkeit',
     welcome: 'Willkommen beim Wichteln!',
     description: 'Erstellen Sie einen lustigen und fairen Wichtel-Geschenkaustausch für Freunde, Familie oder Kollegen.',
+    whatIs: {
+      title: 'Was ist Wichteln?',
+      description1: 'Wichteln ist eine lustige Weihnachtstradition, bei der jeder Person in einer Gruppe zufällig eine andere Person zugewiesen wird, der sie ein Geschenk machen soll. Die Identität des Schenkenden bleibt geheim, bis die Geschenke ausgetauscht werden.',
+      description2: 'Diese App hilft Ihnen, Ihren Wichtel-Austausch zu organisieren, indem sie Teilnehmer zufällig zuweist und dabei alle von Ihnen festgelegten Einschränkungen respektiert (z.B. verhindert, dass Familienmitglieder sich gegenseitig ziehen).',
+    },
     features: {
+      title: 'Funktionen',
+      manage: {
+        title: 'Teilnehmer verwalten',
+        description: 'Fügen Sie Personen einfach hinzu oder entfernen Sie sie von Ihrem Wichteln',
+      },
+      createGroups: {
+        title: 'Gruppen erstellen',
+        description: 'Legen Sie Ausschlussregeln fest, damit Paare oder Familienmitglieder sich nicht gegenseitig ziehen',
+      },
+      smartAssignment: {
+        title: 'Intelligente Zuweisung',
+        description: 'Generieren Sie zufällige Zuweisungen, die Ihre Gruppenbeschränkungen respektieren',
+      },
+      secureReveal: {
+        title: 'Sichere Enthüllung',
+        description: 'Namensüberprüfung stellt sicher, dass nur die richtige Person ihre Zuweisung sieht',
+      },
       privacy: {
         title: 'Privatsphäre zuerst',
         description: 'Namensüberprüfung erforderlich, um Zuweisungen anzuzeigen',
@@ -46,18 +68,30 @@ export default {
       restoreButton: 'Vorherige Sitzung wiederherstellen',
       startFreshButton: 'Neu beginnen',
     },
+    getStartedButton: 'Los geht\'s',
+    orCheckOut: 'oder schauen Sie sich die',
+    howToGuideLink: 'Anleitung',
   },
 
   // Participants page
   participants: {
     title: 'Teilnehmer',
-    addPlaceholder: 'Teilnehmername eingeben',
-    addButton: 'Hinzufügen',
+    manageTitle: 'Teilnehmer verwalten',
+    addPlaceholder: 'Teilnehmername eingeben...',
+    addButton: 'Teilnehmer hinzufügen',
+    adding: 'Wird hinzugefügt...',
     noParticipants: 'Noch keine Teilnehmer',
-    addFirst: 'Fügen Sie Teilnehmer hinzu, um zu beginnen',
+    addFirst: 'Fügen Sie oben Teilnehmer hinzu, um zu beginnen',
     count: '{count} Teilnehmer',
+    countSingular: 'Teilnehmer',
+    countPlural: 'Teilnehmer',
     remove: 'Entfernen',
+    clearAll: 'Alle löschen',
+    groups: 'Gruppen',
     breadcrumb: {
+      step1: '1. Teilnehmer',
+      step2: '2. Gruppen (optional)',
+      step3: '3. Zuweisungen generieren',
       current: 'Teilnehmer',
       groups: 'Gruppen (optional)',
       assignments: 'Zuweisungen generieren',
