@@ -546,7 +546,7 @@
                     </p>
                     <p class="text-4xl font-bold text-christmas-red mb-4" x-text="receiverName"></p>
                     <p class="text-sm text-gray-500">
-                      <span x-text="$t('viewer.closeIn')"></span> <span x-text="verificationModal.revealCountdown"></span> <span x-text="$t('viewer.seconds')"></span>
+                      <span x-text="$t('viewer.closeIn', { seconds: verificationModal.revealCountdown })"></span>
                     </p>
                   </div>
                   <button @click="closeVerificationModal" class="btn btn-primary" x-text="$t('viewer.closeNow')"></button>
