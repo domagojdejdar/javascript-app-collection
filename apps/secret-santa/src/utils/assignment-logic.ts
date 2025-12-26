@@ -10,8 +10,6 @@ import {
   Assignment,
   GenerationConfig,
   GenerationResult,
-  SecretSantaError,
-  ErrorType,
 } from '@/types';
 import { generateId } from './validation';
 

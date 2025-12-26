@@ -87,7 +87,7 @@ export default () => ({
     this.verificationModal.isRevealing = false;
 
     // Focus input after modal opens
-    this.$nextTick(() => {
+    (this as any).$nextTick(() => {
       const input = document.getElementById('verification-name-input') as HTMLInputElement;
       input?.focus();
     });

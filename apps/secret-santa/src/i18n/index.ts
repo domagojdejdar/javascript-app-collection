@@ -100,7 +100,7 @@ export async function changeLanguage(lang: Language): Promise<void> {
  * Get translation function
  */
 export function t(key: string, options?: any): string {
-  return i18next.t(key, options);
+  return i18next.t(key, options) as string;
 }
 
 /**

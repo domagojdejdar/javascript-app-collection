@@ -2,13 +2,7 @@
  * Validation utilities for user input and data integrity
  */
 
-import {
-  Participant,
-  Group,
-  ValidationResult,
-  SecretSantaError,
-  ErrorType,
-} from '@/types';
+import { Participant, Group, ValidationResult } from '@/types';
 
 /**
  * Generates a unique ID using timestamp and random string

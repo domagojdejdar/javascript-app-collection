@@ -181,7 +181,7 @@ export default () => ({
   showCreateForm() {
     this.isCreatingGroup = true;
     // Focus the input after render
-    this.$nextTick(() => {
+    (this as any).$nextTick(() => {
       const input = document.querySelector(
         '#new-group-input'
       ) as HTMLInputElement;

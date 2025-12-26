@@ -96,7 +96,7 @@ export default () => ({
 
         if (success) {
           // Scroll to assignments view
-          this.$nextTick(() => {
+          (this as any).$nextTick(() => {
             const assignmentViewer = document.getElementById('assignment-viewer');
             assignmentViewer?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
@@ -109,7 +109,7 @@ export default () => ({
 
     if (success) {
       // Scroll to assignments view
-      this.$nextTick(() => {
+      (this as any).$nextTick(() => {
         const assignmentViewer = document.getElementById('assignment-viewer');
         assignmentViewer?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });

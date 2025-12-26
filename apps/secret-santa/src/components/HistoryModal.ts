@@ -108,7 +108,7 @@ export default () => ({
       this.close();
 
       // Scroll to assignment viewer
-      this.$nextTick(() => {
+      (this as any).$nextTick(() => {
         const assignmentViewer = document.getElementById('assignment-viewer');
         assignmentViewer?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -240,7 +240,7 @@ export default () => ({
     this.verificationModal.isOpen = true;
 
     // Focus input after modal opens
-    this.$nextTick(() => {
+    (this as any).$nextTick(() => {
       const input = document.getElementById('history-verification-name-input');
       input?.focus();
     });

@@ -2,7 +2,7 @@
  * Alpine.js store for managing groups
  */
 
-import type { Group, Participant } from '@/types';
+import type { Group } from '@/types';
 import { loadGroups, saveGroups, clearGroups } from '@/utils/local-storage';
 import {
   validateGroupName,

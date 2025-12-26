@@ -285,7 +285,7 @@ export function importData(jsonString: string): void {
 
     if (data.history && Array.isArray(data.history)) {
       const validHistory = data.history.filter((h: unknown) => isGeneratedList(h));
-      setItem(StorageKeys.HISTORY, validHistory.slice(0, MAX_HISTORY_ITEMS));
+      setItem(StorageKeys.HISTORY, validHistory.slice(0, getMaxHistoryCount()));
     }
 
     if (data.currentList && isGeneratedList(data.currentList)) {
